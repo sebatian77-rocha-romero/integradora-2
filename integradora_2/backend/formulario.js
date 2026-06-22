@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  formulario.js
+//  formulario.js---formulario de prueba y muestra
 //  Valida el formulario y muestra la sección
 //  de tests al pulsar CONTINUAR.
 //  Guarda los datos del usuario en sessionStorage
