@@ -6,6 +6,7 @@ body {
 
 .container {
   inset: 0;
+  
 }
 
 .container::before {

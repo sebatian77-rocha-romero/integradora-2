@@ -752,8 +752,8 @@ details {
   border: none; border-top: 1px solid var(--cyan);
 }
  
-/* ── Section title ── */
-.section-title {
+/* sub titulos */
+.subtitulo {
   max-width: 960px; margin: 1.5rem auto .75rem;
   font-size: .85rem; letter-spacing: 3px; color: var(--cyan);
   border-left: 3px solid var(--cyan); padding-left: .75rem;
@@ -825,18 +825,22 @@ h2.coral  { color: var(--green); }
 .badge.warn { border: 1px solid var(--amber); color: var(--amber); background: rgba(255,170,0,.08); }
 .badge.bad  { border: 1px solid var(--red);   color: var(--red);   background: rgba(255,68,68,.08); }
  
-/* ── Chart ── */
-.chart-card {
+/* ── grafica ── */
+.grafica-card {
   max-width: 960px; margin: 0 auto 1.5rem;
   background: var(--surface);
   border: 1px solid var(--dim);
   border-radius: 4px; padding: 1.25rem;
 }
-.chart-title {
+.grafica-title {
   font-size: .9rem; letter-spacing: 3px;
   color: var(--text); margin-bottom: 1rem;
 }
-.bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.bar-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    margin-bottom: 10px; }
 .bar-label {
   font-size: .75rem; color: var(--dim);
   width: 130px; flex-shrink: 0; letter-spacing: 1px;
@@ -865,7 +869,7 @@ h2.coral  { color: var(--green); }
   background: var(--surface); border: 1px solid var(--dim);
   border-radius: 4px; padding: 1rem;
 }
-.interp-label { font-size: .75rem; color: var(--violet); letter-spacing: 2px; margin-bottom: 6px; }
+.interp-label { font-size: .95rem; color: var(--violet); letter-spacing: 2px; margin-bottom: 6px; }
 .interp-val { font-size: .9rem; color: var(--text); line-height: 1.5; }
  
 /* ── IA card ── */
