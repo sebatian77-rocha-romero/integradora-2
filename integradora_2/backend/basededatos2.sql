@@ -27,6 +27,7 @@ INSERT INTO carreras (descr) VALUES
   ('Licenciatura en Negocios y Mercadotecnia'),
   ('Licenciatura en Educación'),
   ('Ingeniería Industrial'),
+  ('Ingeniería en Mantenimiento Industrial'),
   ('Licenciatura en Diseño Digital y Producción Audiovisual'),
   ('Licenciatura en Comercio Internacional y Aduanas');
 

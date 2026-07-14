@@ -676,9 +676,9 @@ details {
   --amber: #FFB300;
   --red: #FF5252;
 }
-
+ 
 /* ── Header / titulo ── */
-
+ 
 /*texto*/
 .resultados-header {
   display: flex;
@@ -703,7 +703,7 @@ details {
   position: absolute; left: 0; top: 0;
   font-family: 'VT323', monospace; font-size: inherit;
 }
-
+ 
 /*efecto de glitch*/
 .page-title::before { color: var(--red); clip-path: polygon(0 0,100% 0,100% 40%,0 40%); transform: translateX(-2px); opacity: .6; animation: g1 3s infinite; }
 .page-title::after  { color: var(--cyan);  clip-path: polygon(0 60%,100% 60%,100% 100%,0 100%); transform: translateX(2px); opacity: .6; animation: g2 3s infinite; }
@@ -722,7 +722,9 @@ details {
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
   animation: scanvib 6s ease-in-out infinite;
   min-width: 100px;
+  transition: border-color .2s;
 }
+.puntaje:hover { border-color: var(--cyan); }
 @keyframes scanvib {
   0%,100% { transform: translateX(0); }
   93% { transform: translateX(-1px); } 94% { transform: translateX(1px); } 95% { transform: translateX(0); }
@@ -781,7 +783,9 @@ details {
   align-items: stretch;
   justify-content: flex-start;
 }
-.resultados:hover { border-color: var(--cyan); }
+.resultados:hover { 
+    border-color: var(--cyan); 
+}
  
 h2 {
   font-family: 'VT323', monospace;
@@ -831,7 +835,10 @@ h2.coral  { color: var(--green); }
   background: var(--surface);
   border: 1px solid var(--dim);
   border-radius: 4px; padding: 1.25rem;
+  transition: border-color .2s;
 }
+ 
+.grafica-card:hover { border-color: var(--cyan); }
 .grafica-title {
   font-size: .9rem; letter-spacing: 3px;
   color: var(--text); margin-bottom: 1rem;
@@ -868,7 +875,9 @@ h2.coral  { color: var(--green); }
 .interp-card {
   background: var(--surface); border: 1px solid var(--dim);
   border-radius: 4px; padding: 1rem;
+  transition: border-color .2s;
 }
+.interp-card:hover { border-color: var(--violet); }
 .interp-label { font-size: .95rem; color: var(--violet); letter-spacing: 2px; margin-bottom: 6px; }
 .interp-val { font-size: .9rem; color: var(--text); line-height: 1.5; }
  
@@ -879,7 +888,9 @@ h2.coral  { color: var(--green); }
   border: 1px solid var(--green);
   border-radius: 4px; padding: 1.5rem;
   box-shadow: 0 0 30px rgba(0,230,118,.08);
+  transition: border-color .2s;
 }
+.ia-card:hover { border-color: var(--green); }
 .ia-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
 .ia-icon {
   width: 36px; height: 36px; border-radius: 4px;
