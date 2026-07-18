@@ -10,7 +10,7 @@ const {
   ResultadoStroop, ResultadoSart, ResultadoNback,
 } = require('../models');
 
-// genero
+// ── Resolver género ───────────────────────────
 async function resolverGenero(valor, t) {
   if (!valor) { const f = await Genero.findOne({ transaction: t }); return f?.id || 1; }
   if (!isNaN(valor)) { const g = await Genero.findByPk(parseInt(valor), { transaction: t }); if (g) return g.id; }
@@ -20,7 +20,7 @@ async function resolverGenero(valor, t) {
   return any?.id || 1;
 }
 
-// carrera
+// ── Resolver carrera ──────────────────────────
 async function resolverCarrera(valor, t) {
   if (!valor) return null;
   if (!isNaN(valor)) { const c = await Carrera.findByPk(parseInt(valor), { transaction: t }); if (c) return c.id; }
@@ -29,14 +29,11 @@ async function resolverCarrera(valor, t) {
   const partial = await Carrera.findOne({ where: { descr: { [Op.like]: `%${valor}%` } }, transaction: t });
   if (partial) return partial.id;
   const todas = await Carrera.findAll({ transaction: t });
-  const match = todas.find(c =>
-    c.descr.toLowerCase().includes(String(valor).toLowerCase()) ||
-    String(valor).toLowerCase().includes(c.descr.toLowerCase())
-  );
+  const match = todas.find(c => c.descr.toLowerCase().includes(String(valor).toLowerCase()) || String(valor).toLowerCase().includes(c.descr.toLowerCase()));
   return match?.id || null;
 }
 
-// GET /api/sesion/generos
+// ── GET /api/sesion/generos ───────────────────
 router.get('/generos', async (req, res) => {
   try {
     const generos = await Genero.findAll({ raw: true });
@@ -46,7 +43,7 @@ router.get('/generos', async (req, res) => {
   }
 });
 
-// GET /api/sesion/carreras
+// ── GET /api/sesion/carreras ──────────────────
 router.get('/carreras', async (req, res) => {
   try {
     const carreras = await Carrera.findAll({ raw: true });
@@ -56,14 +53,13 @@ router.get('/carreras', async (req, res) => {
   }
 });
 
-// POST /api/sesion/completa  <--- inserta los datos en la bd
+// ── POST /api/sesion/completa ─────────────────
 router.post('/completa', async (req, res) => {
   const { usuario, academico, dispositivo, stroop, sart, nback } = req.body;
 
-  console.log('[SEMK] --- POST /completa ---');
-  console.log('[SEMK] usuario:', JSON.stringify(usuario));
-  console.log('[SEMK] academico:', JSON.stringify(academico));
-  console.log('[SEMK] dispositivo:', JSON.stringify(dispositivo));
+  console.log('[SEMK] POST /completa — usuario:', JSON.stringify(usuario));
+  console.log('[SEMK] POST /completa — academico:', JSON.stringify(academico));
+  console.log('[SEMK] POST /completa — dispositivo:', JSON.stringify(dispositivo));
 
   if (!usuario || !academico || !stroop || !sart || !nback) {
     return res.status(400).json({ ok: false, message: 'Faltan datos: usuario, academico, stroop, sart, nback.' });
@@ -78,14 +74,13 @@ router.post('/completa', async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
-    // Resolver catálogos
+    // 1. Resolver catálogos
     let id_genero  = parseInt(usuario.id_genero)   || null;
     let id_carrera = parseInt(academico.id_carrera) || null;
     if (!id_genero)  id_genero  = await resolverGenero(usuario.genero, t);
     if (!id_carrera) id_carrera = await resolverCarrera(academico.carrera, t);
 
-    console.log('[SEMK] id_genero resuelto:', id_genero);
-    console.log('[SEMK] id_carrera resuelto:', id_carrera);
+    console.log('[SEMK] id_genero:', id_genero, '| id_carrera:', id_carrera);
 
     if (!id_carrera) {
       await t.rollback();
@@ -96,8 +91,7 @@ router.post('/completa', async (req, res) => {
       return res.status(400).json({ ok: false, message: 'Genero no encontrado en la BD.' });
     }
 
-    //Insertar usuario
-    console.log('[SEMK] Insertando usuario...');
+    // 2. Usuario
     const nuevoUsuario = await Usuario.create({
       p_apellido: usuario.p_apellido,
       s_apellido: usuario.s_apellido || null,
@@ -105,23 +99,22 @@ router.post('/completa', async (req, res) => {
       fecha_nac:  usuario.fecha_nac,
       id_genero,
     }, { transaction: t });
-    const idUsuario = nuevoUsuario.id;
-    console.log('[SEMK] Usuario creado id:', idUsuario);
 
-    // Datos académicos
-    console.log('[SEMK] Insertando datos_academicos...');
+    const idUsuario = nuevoUsuario.id;
+
+    // 3. Datos académicos
     await DatosAcademicos.create({
       id_usuario: idUsuario,
       id_carrera,
       grado: parseInt(academico.grado) || 1,
     }, { transaction: t });
-    console.log('[SEMK] datos_academicos OK');
 
     // 4. Datos dispositivo
-    console.log('[SEMK] Insertando datos_dispositivo...');
+    // IMPORTANTE: el campo enum se llama 'dispositivo' en la BD
+    // pero en el payload viene dentro del objeto 'dispositivo'
+    // como la propiedad 'dispositivo' — hay que leerla explícitamente
     const tipoDispositivo = dispositivo?.dispositivo || null;
     const horasCelular    = parseFloat(dispositivo?.horas_celular) || 0;
-    console.log('[SEMK] tipoDispositivo:', tipoDispositivo, '| horasCelular:', horasCelular);
 
     await DatosDispositivo.create({
       id_usuario:               idUsuario,
@@ -130,26 +123,23 @@ router.post('/completa', async (req, res) => {
       tiempo_pantalla_real_min: dispositivo?.tiempo_pantalla_real_min || null,
       app_mas_usada_real:       dispositivo?.app_mas_usada_real       || null,
       origen:                   dispositivo?.origen || 'web',
-      dispositivo:              tipoDispositivo,
+      dispositivo:              tipoDispositivo,      // enum: movil|escritorio|tablet
       sistema_operativo:        dispositivo?.sistema_operativo || null,
       navegador:                dispositivo?.navegador         || null,
       tipo_red:                 dispositivo?.tipo_red          || null,
     }, { transaction: t });
-    console.log('[SEMK] datos_dispositivo OK');
 
     // 5. Sesión
-    console.log('[SEMK] Insertando sesion...');
     const nuevaSesion = await Sesion.create({
       id_usuario: idUsuario,
       completada: 1,
       ip_origen:  req.headers['x-forwarded-for']?.split(',')[0]?.trim()
                   || req.socket?.remoteAddress || null,
     }, { transaction: t });
+
     const idSesion = nuevaSesion.id;
-    console.log('[SEMK] Sesion creada id:', idSesion);
 
     // 6. Stroop
-    console.log('[SEMK] Insertando resultado_stroop...');
     await ResultadoStroop.create({
       id_sesion:             idSesion,
       rt_congruente_ms:      stroop.rt_congruente_ms      || 0,
@@ -163,10 +153,8 @@ router.post('/completa', async (req, res) => {
       tasa_error_pct:        stroop.tasa_error_pct         || 0,
       duracion_total_ms:     stroop.duracion_total_ms      || 0,
     }, { transaction: t });
-    console.log('[SEMK] resultado_stroop OK');
 
     // 7. SART
-    console.log('[SEMK] Insertando resultado_sart...');
     await ResultadoSart.create({
       id_sesion:         idSesion,
       errores_omision:   sart.errores_omision   || 0,
@@ -180,10 +168,8 @@ router.post('/completa', async (req, res) => {
       rt_desviacion_ms:  sart.rt_desviacion_ms  || 0,
       duracion_total_ms: sart.duracion_total_ms || 0,
     }, { transaction: t });
-    console.log('[SEMK] resultado_sart OK');
 
     // 8. N-Back
-    console.log('[SEMK] Insertando resultado_nback...');
     await ResultadoNback.create({
       id_sesion:         idSesion,
       nivel_n:           nback.nivel_n          || 2,
@@ -197,10 +183,9 @@ router.post('/completa', async (req, res) => {
       rt_desviacion_ms:  nback.rt_desviacion_ms || 0,
       duracion_total_ms: nback.duracion_total_ms|| 0,
     }, { transaction: t });
-    console.log('[SEMK] resultado_nback OK');
 
     await t.commit();
-    console.log('[SEMK] Commit exitoso. sesion_id:', idSesion, '| usuario_id:', idUsuario);
+    console.log('[SEMK] Sesion guardada. sesion_id:', idSesion, 'usuario_id:', idUsuario);
 
     return res.status(201).json({
       ok:         true,
@@ -211,26 +196,21 @@ router.post('/completa', async (req, res) => {
 
   } catch (err) {
     await t.rollback();
-    console.error('[SEMK] ERROR en transaccion:');
-    console.error('  name:       ', err.name);
-    console.error('  message:    ', err.message);
-    console.error('  sql:        ', err.sql);
-    console.error('  sqlMessage: ', err.original?.sqlMessage);
-    console.error('  errno:      ', err.original?.errno);
-    console.error('  fields:     ', JSON.stringify(err.fields));
-    console.error('  stack:      ', err.stack?.split('\n')[1]);
+      console.error('[SEMK] Error al guardar sesion:', err);
 
-    return res.status(500).json({
-      ok:         false,
-      message:    'Error interno al guardar los resultados.',
-      error:      err.message,
-      sqlMessage: err.original?.sqlMessage,
-      errno:      err.original?.errno,
-    });
+      // En entornos de desarrollo devolvemos más detalles para depuración.
+      const isDev = process.env.NODE_ENV !== 'production';
+      const resp = { ok: false, message: 'Error interno al guardar los resultados.' };
+      if (isDev) {
+        resp.error = err.message;
+        resp.stack = err.stack;
+      }
+
+      return res.status(500).json(resp);
   }
 });
 
-// GET /api/sesion/:id
+// ── GET /api/sesion/:id ───────────────────────
 router.get('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   if (!id || isNaN(id)) return res.status(400).json({ ok: false, message: 'ID invalido.' });
@@ -242,13 +222,13 @@ router.get('/:id', async (req, res) => {
       ResultadoSart.findOne(  { where: { id_sesion: id }, raw: true }),
       ResultadoNback.findOne( { where: { id_sesion: id }, raw: true }),
     ]);
-    return res.json({ ok: true, data: { sesion, stroop, sart, nback } });
+    return res.json({ ok: true, data: { usuario: sesion.Usuario || sesion, sesion, stroop, sart, nback } });
   } catch (err) {
     return res.status(500).json({ ok: false, message: err.message });
   }
 });
 
-// GET /api/sesion
+// ── GET /api/sesion ───────────────────────────
 router.get('/', async (req, res) => {
   try {
     const { limit = 100, offset = 0 } = req.query;
@@ -260,6 +240,36 @@ router.get('/', async (req, res) => {
     return res.json({ ok: true, total: sesiones.length, data: sesiones });
   } catch (err) {
     return res.status(500).json({ ok: false, message: err.message });
+  }
+});
+
+
+// ── POST /api/sesion/retroalimentacion ───────
+router.post('/retroalimentacion', async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ ok: false, message: 'Falta el prompt.' });
+  try {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    if (data.error) {
+      console.error('[SEMK] Error DeepSeek:', data.error);
+      return res.status(500).json({ ok: false, message: data.error.message });
+    }
+    res.json({ ok: true, texto: data.choices?.[0]?.message?.content || '' });
+  } catch (err) {
+    console.error('[SEMK] Error IA:', err.message);
+    res.status(500).json({ ok: false, message: err.message });
   }
 });
 

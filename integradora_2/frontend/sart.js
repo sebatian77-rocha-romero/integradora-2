@@ -41,7 +41,7 @@ function sartUpdateTimer() {
 function sartUpdateStats() {
   const d = sartDetail();
   if (!d) return;
-
+ 
   const statValues = d.querySelectorAll('.stats .stat-value');
   if (statValues[0]) statValues[0].textContent = sart.aciertos;
   if (statValues[1]) statValues[1].textContent = sart.comisiones + sart.omisiones;
@@ -211,6 +211,49 @@ function sartEnd() {
 }
  
 // ── Inicializar ───────────────────────────────
+ 
+// ── Cuenta regresiva antes del test ──────────
+function sartCountdown(callback) {
+  const detail = sartDetail();
+  const estEl  = sartGet('.est');
+  if (!estEl) { callback(); return; }
+ 
+  estEl.style.fontSize = '1.2rem';
+  estEl.style.color    = '#00e676';
+  estEl.textContent    = '';
+ 
+  let btn = detail.querySelector('.btn-iniciar-test');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.className   = 'btn-iniciar-test';
+    btn.textContent = '[ INICIAR TEST ]';
+    btn.style.cssText = 'font-family:VT323,monospace;font-size:1.4rem;letter-spacing:3px;padding:.7rem 2rem;background:transparent;border:1px solid #00e676;border-radius:4px;color:#00e676;cursor:pointer;margin-top:1rem;';
+    estEl.after(btn);
+  }
+  btn.style.display = 'inline-block';
+ 
+  btn.onclick = () => {
+    btn.style.display = 'none';
+    let count = 3;
+    estEl.style.fontSize = '6rem';
+    estEl.textContent    = count;
+    estEl.style.color    = '#7b2fff';
+ 
+    const iv = setInterval(() => {
+      count--;
+      if (count > 0) {
+        estEl.textContent = count;
+        estEl.style.color = count === 2 ? '#ffaa00' : '#ff4444';
+      } else {
+        clearInterval(iv);
+        estEl.textContent = '¡YA!';
+        estEl.style.color = '#00e676';
+        setTimeout(callback, 400);
+      }
+    }, 800);
+  };
+}
+ 
 function initSart() {
   sart = {
     seq: sartBuildSeq(),
@@ -228,16 +271,19 @@ function initSart() {
   const btnRes = sartGet('.res');
   if (btnRes) btnRes.onclick = sartResponder;
  
-  sart.timerInterval = setInterval(() => {
-    sart.secsLeft--;
-    sartUpdateTimer();
-    if (sart.secsLeft <= 0) {
-      clearInterval(sart.timerInterval);
-      clearTimeout(sart.stimTimeout);
-      sartEnd();
-    }
-  }, 1000);
+  // El timer de 180s arranca justo cuando termina la cuenta regresiva
+  sartCountdown(() => {
+    sart.timerInterval = setInterval(() => {
+      sart.secsLeft--;
+      sartUpdateTimer();
+      if (sart.secsLeft <= 0) {
+        clearInterval(sart.timerInterval);
+        clearTimeout(sart.stimTimeout);
+        sartEnd();
+      }
+    }, 1000);
  
-  sartUpdateTimer();
-  setTimeout(sartNext, 600);
+    sartUpdateTimer();
+    setTimeout(sartNext, 200);
+  });
 }

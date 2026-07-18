@@ -8,7 +8,6 @@
 //  enviarResultados() para subir todo al backend.
 // ─────────────────────────────────────────────
 
-
 const NBACK_LETTERS   = ['A','B','C','D','F','G','H','J','K','L'];
 const NBACK_PRACTICA  = 10;
 const NBACK_REAL      = 20;
@@ -55,7 +54,7 @@ function nbackUpdateTimer() {
 function nbackUpdateStats() {
   const d = nbackDetail();
   if (!d) return;
-
+ 
   const statValues = d.querySelectorAll('.stats .stat-value');
   if (statValues[0]) statValues[0].textContent = nback.aciertos;
   if (statValues[1]) statValues[1].textContent = nback.errores + nback.omisiones;
@@ -107,7 +106,7 @@ function nbackFeedback(msg, color) {
   estEl.style.fontSize = '1.1rem';
   estEl.textContent    = msg;
 }
-
+ 
 function nbackUpdateHist(currentLetter, isMatch) {
   // historial oculto
   const detail = nbackDetail();
@@ -127,6 +126,10 @@ function nbackNext() {
         nback.fase    = 'real';
         nback.n       = 2;
         nback.idx     = 0;
+        nback.aciertos = 0;
+        nback.errores  = 0;
+        nback.omisiones= 0;
+        nback.rts      = [];
         nback.seq     = nbackBuildSeq(2, NBACK_REAL, 0.35);
         nback.historia = [];
         nbackNext();
@@ -187,12 +190,11 @@ function nbackCoincidir() {
   nbackBlankActive = true;
  
   if (esMatch) {
-    nback.aciertos++;
-    nback.rts.push(rt);
+    if (nback.fase === 'real') { nback.aciertos++; nback.rts.push(rt); }
     nbackFeedback('✓ CORRECTO — ' + rt + ' ms', '#00e676');
     nbackUpdateHist(nback.currentItem.letter, true);
   } else {
-    nback.errores++;
+    if (nback.fase === 'real') nback.errores++;
     nbackFeedback('✗ FALSO POSITIVO', '#ff4444');
   }
  
@@ -318,6 +320,49 @@ async function enviarResultados() {
 }
  
 // ── Inicializar ───────────────────────────────
+ 
+// ── Cuenta regresiva antes del test ──────────
+function nbackCountdown(callback) {
+  const detail = nbackDetail();
+  const estEl  = nbackGet('.est');
+  if (!estEl) { callback(); return; }
+ 
+  estEl.style.fontSize = '1.2rem';
+  estEl.style.color    = '#7b2fff';
+  estEl.textContent    = '';
+ 
+  let btn = detail.querySelector('.btn-iniciar-test');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.className   = 'btn-iniciar-test';
+    btn.textContent = '[ INICIAR TEST ]';
+    btn.style.cssText = 'font-family:VT323,monospace;font-size:1.4rem;letter-spacing:3px;padding:.7rem 2rem;background:transparent;border:1px solid #7b2fff;border-radius:4px;color:#7b2fff;cursor:pointer;margin-top:1rem;';
+    estEl.after(btn);
+  }
+  btn.style.display = 'inline-block';
+ 
+  btn.onclick = () => {
+    btn.style.display = 'none';
+    let count = 3;
+    estEl.style.fontSize = '6rem';
+    estEl.textContent    = count;
+    estEl.style.color    = '#7b2fff';
+ 
+    const iv = setInterval(() => {
+      count--;
+      if (count > 0) {
+        estEl.textContent = count;
+        estEl.style.color = count === 2 ? '#ffaa00' : '#ff4444';
+      } else {
+        clearInterval(iv);
+        estEl.textContent = '¡YA!';
+        estEl.style.color = '#00e676';
+        setTimeout(callback, 400);
+      }
+    }, 800);
+  };
+}
+ 
 function initNback() {
   nback = {
     seq:      nbackBuildSeq(1, NBACK_PRACTICA, 0.40), // práctica: 40% matches (más fácil)
@@ -336,18 +381,21 @@ function initNback() {
   const btnCoinc = nbackGet('.res');
   if (btnCoinc) btnCoinc.onclick = nbackCoincidir;
  
-  nbackFeedback('FASE DE PRÁCTICA (1-back) — INICIANDO...', '#7b2fff');
+  // feedback inicial removido — se muestra botón INICIAR
  
-  nback.timerInterval = setInterval(() => {
-    nback.secsLeft--;
+  // El timer de 150s arranca justo cuando termina la cuenta regresiva
+  nbackCountdown(() => {
+    nback.timerInterval = setInterval(() => {
+      nback.secsLeft--;
+      nbackUpdateTimer();
+      if (nback.secsLeft <= 0) {
+        clearInterval(nback.timerInterval);
+        clearTimeout(nback.stimTimeout);
+        nbackEnd();
+      }
+    }, 1000);
+ 
     nbackUpdateTimer();
-    if (nback.secsLeft <= 0) {
-      clearInterval(nback.timerInterval);
-      clearTimeout(nback.stimTimeout);
-      nbackEnd();
-    }
-  }, 1000);
- 
-  nbackUpdateTimer();
-  setTimeout(nbackNext, 1500);
+    setTimeout(nbackNext, 500);
+  });
 }

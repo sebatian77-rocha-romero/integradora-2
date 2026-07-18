@@ -198,6 +198,51 @@ function stroopEnd() {
 }
  
 // ── Inicializar ───────────────────────────────
+
+// ── Cuenta regresiva antes del test ──────────
+function stroopCountdown(callback) {
+  const detail = stroopDetail();
+  const estEl  = stroopGet('.est');
+  if (!estEl) { callback(); return; }
+
+  // Mostrar botón de inicio
+  estEl.style.fontSize = '1.2rem';
+  estEl.style.color    = '#00e676';
+  estEl.textContent    = '';
+
+  // Crear botón INICIAR si no existe
+  let btn = detail.querySelector('.btn-iniciar-test');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.className   = 'btn-iniciar-test';
+    btn.textContent = '[ INICIAR TEST ]';
+    btn.style.cssText = 'font-family:VT323,monospace;font-size:1.4rem;letter-spacing:3px;padding:.7rem 2rem;background:transparent;border:1px solid #00e676;border-radius:4px;color:#00e676;cursor:pointer;margin-top:1rem;';
+    estEl.after(btn);
+  }
+  btn.style.display = 'inline-block';
+
+  btn.onclick = () => {
+    btn.style.display = 'none';
+    let count = 3;
+    estEl.style.fontSize = '6rem';
+    estEl.textContent    = count;
+    estEl.style.color    = '#7b2fff';
+
+    const iv = setInterval(() => {
+      count--;
+      if (count > 0) {
+        estEl.textContent = count;
+        estEl.style.color = count === 2 ? '#ffaa00' : '#ff4444';
+      } else {
+        clearInterval(iv);
+        estEl.textContent = '¡YA!';
+        estEl.style.color = '#00e676';
+        setTimeout(callback, 400);
+      }
+    }, 800);
+  };
+}
+
 function initStroop() {
   stroop = {
     seq: stroopShuffle(STROOP_ITEMS),
@@ -216,16 +261,19 @@ function initStroop() {
     btn.onclick = () => answer(btn.dataset.color);
   });
  
-  stroop.timerInterval = setInterval(() => {
-    stroop.secsLeft--;
+  // El timer de 150s arranca justo cuando termina la cuenta regresiva,
+  // no mientras el usuario ve el botón "INICIAR" o el 3-2-1.
+  stroopCountdown(() => {
+    stroop.timerInterval = setInterval(() => {
+      stroop.secsLeft--;
+      stroopTimer();
+      if (stroop.secsLeft <= 0) {
+        clearInterval(stroop.timerInterval);
+        stroopEnd();
+      }
+    }, 1000);
+
     stroopTimer();
-    if (stroop.secsLeft <= 0) {
-      clearInterval(stroop.timerInterval);
-      stroopEnd();
-    }
-  }, 1000);
- 
-  stroopTimer();
-  // Pequeña pausa para que el DOM esté listo antes del primer estímulo
-  setTimeout(stroopLoad, 300);
+    stroopLoad();
+  });
 }

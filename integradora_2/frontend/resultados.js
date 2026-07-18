@@ -19,7 +19,7 @@ async function cargarDatos() {
       const res  = await fetch('/api/sesion/' + sesionId);
       const json = await res.json();
       if (json.ok) {
-        usuario = json.data.usuario || {};
+        usuario = json.data.usuario || json.data.sesion?.Usuario || json.data.sesion || {};
         stroop  = json.data.stroop  || {};
         sart    = json.data.sart    || {};
         nback   = json.data.nback   || {};
@@ -59,7 +59,7 @@ function renderizar() {
 
 // ── Usuario ───────────────────────────────────
 function renderUsuario() {
-  const nombre = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ') || 'Participante';
+  const nombre = [usuario.nombre, usuario.p_apellido, usuario.s_apellido].filter(Boolean).join(' ') || 'Participante';
   document.getElementById('user-name').textContent = nombre;
 
   const chips = document.getElementById('user-chips');
@@ -261,17 +261,13 @@ Perfil: ${usuario.horas_celular || '—'} horas de celular al día. App principa
 Escribe una retroalimentación en español de exactamente 3 párrafos cortos. Párrafo 1: qué dicen los resultados en lenguaje simple, sin números técnicos. Párrafo 2: cuál dimensión está más afectada y por qué importa para el rendimiento académico diario. Párrafo 3: exactamente 2 recomendaciones concretas y prácticas que pueda aplicar esta semana. Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Sin tecnicismos.`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/sesion/retroalimentacion', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model:      'claude-sonnet-4-6',
-        max_tokens: 600,
-        messages:   [{ role: 'user', content: prompt }]
-      })
+      body:    JSON.stringify({ prompt })
     });
     const data  = await res.json();
-    const texto = data.content?.[0]?.text || 'No se pudo generar la retroalimentación.';
+    const texto = data.texto || 'No se pudo generar la retroalimentación.';
 
     out.className = 'ia-body';
     out.innerHTML = '';
