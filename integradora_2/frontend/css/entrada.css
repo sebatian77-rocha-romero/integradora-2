@@ -1,3 +1,9 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   overflow: hidden;
@@ -5,7 +11,16 @@ body {
 }
 
 .container {
-  inset: 0;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(20px, 4vh, 40px);
+  padding: clamp(40px, 10vh, 2px) 16px 24px;
   
 }
 
@@ -264,6 +279,7 @@ body {
 
 }
 
+
 /*escaneo de linea*/
 /* scan line */
 .cuadro::after {
@@ -303,11 +319,7 @@ p {
 
 /*estilos para boton de entrada*/
 .button-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: 60px 0 0 0;
-  transform: translate(-50%, -50%);
+  position: relative;
   font-family: 'VT323', monospace;
 
 }
@@ -487,7 +499,7 @@ p {
   align-items: stretch;
   justify-content: space-between;
   gap: 10px;
-  width: 80%;
+  width: min(90%, 600px);
   max-width: 600px;
   position: relative;
   margin: 0 auto;
@@ -507,7 +519,7 @@ p {
   text-align: center;
   
   flex: 1;
-  margin: 25px 0;
+  margin: 5px 0;
   position: relative;
   padding: 27px 20px 0 20px;  
   
@@ -593,6 +605,49 @@ p {
     letter-spacing: 2px;
   }
 }
+
+/* ── Rendimiento en movil: fondo animado mas liviano ── */
+@media (max-width: 768px) {
+  .container::before {
+    inset: -30%;
+    background-image: radial-gradient(4px 100px at 0px 235px, #F43F5E, #0000),
+      radial-gradient(4px 100px at 300px 235px, #38BDF8, #0000),
+      radial-gradient(1.5px 1.5px at 150px 117.5px, #F43F5E 100%, #0000 150%),
+      radial-gradient(4px 100px at 0px 253px, #38BDF8, #0000),
+      radial-gradient(4px 100px at 300px 253px, #F43F5E, #0000),
+      radial-gradient(1.5px 1.5px at 150px 126.5px, #38BDF8 100%, #0000 150%),
+      radial-gradient(4px 100px at 0px 179px, #F43F5E, #0000),
+      radial-gradient(4px 100px at 300px 179px, #38BDF8, #0000),
+      radial-gradient(1.5px 1.5px at 150px 89.5px, #F43F5E 100%, #0000 150%),
+      radial-gradient(4px 100px at 0px 281px, #38BDF8, #0000),
+      radial-gradient(4px 100px at 300px 281px, #F43F5E, #0000),
+      radial-gradient(1.5px 1.5px at 150px 140.5px, #38BDF8 100%, #0000 150%);
+    background-size:
+      300px 235px, 300px 235px, 300px 235px,
+      300px 253px, 300px 253px, 300px 253px,
+      300px 179px, 300px 179px, 300px 179px,
+      300px 281px, 300px 281px, 300px 281px;
+    animation: hi-mobile 150s linear infinite;
+  }
+
+  @keyframes hi-mobile {
+    0% {
+      background-position:
+        0px 220px, 3px 220px, 151.5px 337.5px,
+        75px 224px, 78px 224px, 226.5px 350.5px,
+        150px 31px, 153px 31px, 301.5px 120.5px,
+        225px 224px, 228px 224px, 376.5px 364.5px;
+    }
+    to {
+      background-position:
+        0px 6800px, 3px 6800px, 151.5px 6917.5px,
+        75px 17175px, 78px 17175px, 226.5px 17301.5px,
+        150px 9876px, 153px 9876px, 301.5px 9965.5px,
+        225px 18770px, 228px 18770px, 376.5px 18910.5px;
+    }
+  }
+}
+
 
 /* ── Respeta la preferencia de menos movimiento del usuario ── */
 @media (prefers-reduced-motion: reduce) {
