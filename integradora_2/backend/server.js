@@ -26,7 +26,7 @@ app.get('/api/health', (req, res) => {
 });
  
 // ── Fallback: servir index.html para rutas del frontend ──
-app.get('/{*path}', (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
  
