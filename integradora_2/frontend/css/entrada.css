@@ -553,3 +553,64 @@ p {
   font-weight: 400;
   font-style: normal;
 }
+
+/* ── Responsive: pantallas pequeñas ── */
+@media (max-width: 480px) {
+  .glitch {
+    font-size: clamp(28px, 9vw, 40px);
+    letter-spacing: 2px;
+  }
+
+  .cuadro p {
+    font-size: clamp(14px, 4vw, 18px);
+    margin-bottom: 12px;
+  }
+
+  .c-cuadro {
+    width: 94%;
+    gap: 6px;
+  }
+
+  .c-cuadro .c1,
+  .c-cuadro .c2,
+  .c-cuadro .c3 {
+    padding: 16px 6px 0 6px;
+    margin: 12px 0;
+  }
+
+  .c-cuadro p {
+    font-size: clamp(11px, 3.2vw, 14px);
+  }
+
+  .spiderverse-button {
+    padding: 12px 24px;
+    font-size: clamp(12px, 4vw, 16px);
+    letter-spacing: 2px;
+  }
+
+  .glitch-layer {
+    font-size: clamp(12px, 4vw, 16px);
+    letter-spacing: 2px;
+  }
+}
+
+/* ── Respeta la preferencia de menos movimiento del usuario ── */
+@media (prefers-reduced-motion: reduce) {
+  .container::before,
+  .glitch:before,
+  .glitch:after,
+  .cuadro,
+  .cuadro::after,
+  .c-cuadro .c1,
+  .c-cuadro .c2,
+  .c-cuadro .c3,
+  .c-cuadro .c1::after,
+  .c-cuadro .c2::after,
+  .c-cuadro .c3::after,
+  .spiderverse-button,
+  .glitch-layer,
+  .noise,
+  .glitch-slice {
+    animation: none !important;
+  }
+}
