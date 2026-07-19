@@ -7,7 +7,7 @@ const {
   Genero, Carrera,
   Usuario, DatosAcademicos, DatosDispositivo,
   Sesion,
-  ResultadoStroop, ResultadoSart, ResultadoNback,
+  ResultadoStroop, ResultadoSart, ResultadoNback, StroopDetalle,
 } = require('../models');
 
 // ── Resolver género ───────────────────────────
@@ -153,6 +153,23 @@ router.post('/completa', async (req, res) => {
       tasa_error_pct:        stroop.tasa_error_pct         || 0,
       duracion_total_ms:     stroop.duracion_total_ms      || 0,
     }, { transaction: t });
+
+    // 6b. Stroop detalle (item por item)
+    if (Array.isArray(stroop.detalle) && stroop.detalle.length) {
+      await Promise.all(stroop.detalle.map(d =>
+        StroopDetalle.create({
+          id_sesion:         idSesion,
+          orden:             d.orden,
+          tipo:              d.tipo,
+          palabra:           d.palabra,
+          color_tinta:       d.color_tinta,
+          respuesta_usuario: d.respuesta_usuario,
+          correcto:          d.correcto,
+          rt_ms:             d.rt_ms,
+        }, { transaction: t })
+      ));
+      console.log('[SEMK] stroop_detalle OK — items:', stroop.detalle.length);
+    }
 
     // 7. SART
     await ResultadoSart.create({

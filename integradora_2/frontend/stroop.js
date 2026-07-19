@@ -127,6 +127,15 @@ function answer(color) {
   const esCong = item.word.toLowerCase() === INK_MAP[item.ink];
  
   stroop.rts.push(rt);
+  stroop.detalle.push({
+    orden:             stroop.idx + 1,
+    tipo:              esCong ? 'congruente' : 'incongruente',
+    palabra:           item.word,
+    color_tinta:       item.answer,
+    respuesta_usuario: color,
+    correcto:          ok ? 1 : 0,
+    rt_ms:             rt,
+  });
   if (ok) {
     stroop.aciertos++;
     if (esCong) { stroop.acCong++;  stroop.rtsCong.push(rt); }
@@ -178,6 +187,7 @@ function stroopEnd() {
     tasa_error_pct:        parseFloat(tasaError),
     duracion_total_ms:     (STROOP_DURATION - stroop.secsLeft) * 1000,
   };
+  resultadoStroop.detalle = stroop.detalle;
   sessionStorage.setItem('semk_stroop', JSON.stringify(resultadoStroop));
  
   const estEl = stroopGet('.est');
@@ -249,6 +259,7 @@ function initStroop() {
     idx: 0, aciertos: 0, errores: 0,
     rts: [], rtStart: 0, secsLeft: STROOP_DURATION,
     timerInterval: null, answered: false,
+    detalle: [],
     rtsCong: [], rtsIncong: [],
     errCong: 0, errIncong: 0, acCong: 0, acIncong: 0,
   };
