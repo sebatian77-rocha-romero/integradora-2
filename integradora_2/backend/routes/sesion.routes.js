@@ -8,6 +8,7 @@ const {
   Usuario, DatosAcademicos, DatosDispositivo,
   Sesion,
   ResultadoStroop, ResultadoSart, ResultadoNback, StroopDetalle,
+  ComportamientoSesion,
 } = require('../models');
 
 // ── Resolver género ───────────────────────────
@@ -55,7 +56,7 @@ router.get('/carreras', async (req, res) => {
 
 // ── POST /api/sesion/completa ─────────────────
 router.post('/completa', async (req, res) => {
-  const { usuario, academico, dispositivo, stroop, sart, nback } = req.body;
+  const { usuario, academico, dispositivo, stroop, sart, nback, comportamiento } = req.body;
 
   console.log('[SEMK] POST /completa — usuario:', JSON.stringify(usuario));
   console.log('[SEMK] POST /completa — academico:', JSON.stringify(academico));
@@ -138,6 +139,17 @@ router.post('/completa', async (req, res) => {
     }, { transaction: t });
 
     const idSesion = nuevaSesion.id;
+
+    // 5b. Comportamiento de sesion (tracking del frontend)
+    await ComportamientoSesion.create({
+      id_sesion:         idSesion,
+      cambios_pestana:   comportamiento?.cambios_pestana   || 0,
+      segundos_fuera:    comportamiento?.segundos_fuera    || 0,
+      en_que_test_salio: comportamiento?.en_que_test_salio || [],
+      orientacion:       comportamiento?.orientacion       || null,
+      tipo_input:        comportamiento?.tipo_input        || null,
+      nivel_bateria_pct: comportamiento?.nivel_bateria_pct ?? null,
+    }, { transaction: t });
 
     // 6. Stroop
     await ResultadoStroop.create({

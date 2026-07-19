@@ -294,6 +294,10 @@ async function enviarResultados() {
     stroop: stroopR,
     sart:   sartR,
     nback:  nbackR,
+    // Coincide con la tabla `comportamiento_sesion`
+    comportamiento: typeof obtenerComportamiento === 'function'
+      ? obtenerComportamiento()
+      : {},
   };
  
   try {
