@@ -207,7 +207,7 @@ function nbackCoincidir() {
   }, NBACK_BLANK_MS);
 }
  
-// ── Fin del test ──────────────────────────────
+// Fin del test 
 function nbackEnd() {
   clearInterval(nback.timerInterval);
   clearTimeout(nback.stimTimeout);
@@ -246,7 +246,7 @@ function nbackEnd() {
   setTimeout(enviarResultados, 1000);
 }
  
-// ── Enviar resultados al backend ──────────────
+// Enviar resultados al backend
 async function enviarResultados() {
   const usuario = JSON.parse(sessionStorage.getItem('semk_usuario') || '{}');
   console.log('[SEMK] semk_usuario completo:', JSON.stringify(usuario, null, 2));

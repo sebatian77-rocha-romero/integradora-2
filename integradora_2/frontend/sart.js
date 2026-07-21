@@ -97,7 +97,7 @@ function sartNext() {
   const estEl = sartGet('.est');
   if (estEl) {
     estEl.textContent    = sart.currentNum;
-    estEl.style.color    = sart.currentNum === SART_NOGO ? '#ff4444' : '#e0e0ff';
+    estEl.style.color    = sart.currentNum === SART_NOGO ? '#e0e0ff' : '#e0e0ff';
     estEl.style.fontSize = '6rem';
   }
  
