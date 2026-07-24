@@ -83,7 +83,7 @@
                 <option>WhatsApp</option>
                 <option value="otras">Otras</option>
             </select>
-            <input type="text" id="apps-otra" placeholder="Escribe el nombre de la app" style="display:none; margin-top:8px;">
+            <input type="text" id="apps-otra" placeholder="Escribe el nombre de la app" class="apps-otra">
         </div>
 
         <button class="continuar">CONTINUAR</button>
@@ -206,7 +206,8 @@
                     </div>
                     
                     <div class="min_instruccion">
-                        <p>Instrucciones: presione el boton de coincidencia cuando la letra mostrada coincida con alguna de las dos letras anteriores memorizadas.</p>
+                        <p><strong>Instrucciones:</strong> vas a ver una letra a la vez. Presiona el botón de <strong>coincidencia</strong> solo cuando la letra actual sea <strong>igual a la que apareció hace 2 turnos</strong> (no la letra justo anterior, sino la de antes de esa).</p>
+                        <p class="ejemplo"><strong>Ejemplo:</strong> si ves A → B → A, presiona el botón en la segunda "A", porque es igual a la letra de 2 turnos atrás.</p>
                     </div>
 
                     <div class="estimulo">

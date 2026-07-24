@@ -971,3 +971,16 @@ h2.coral  { color: var(--green); }
   font-size: 1.15rem; color: var(--dim);
   text-align: center; letter-spacing: 1px; line-height: 1.8;
 }   
+
+.apps-otra {
+  display: none;
+  margin-top: 8px;
+}
+
+.ejemplo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
