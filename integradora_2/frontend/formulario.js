@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Cargar catálogos desde la BD ─────────────
   await Promise.all([cargarCarreras(), cargarGeneros()]);
 
+  // ── Mostrar input libre cuando se elige "Otras" en apps ──
+  const selectApps = document.getElementById('apps');
+  const inputAppsOtra = document.getElementById('apps-otra');
+  if (selectApps && inputAppsOtra) {
+    selectApps.addEventListener('change', () => {
+      const esOtra = selectApps.value === 'otras';
+      inputAppsOtra.style.display = esOtra ? 'block' : 'none';
+      if (!esOtra) inputAppsOtra.value = '';
+    });
+  }
+
   // ── Calcular edad a partir de fecha_nac ───────
   function calcularEdad(fecha) {
     if (!fecha) return '';
@@ -101,7 +112,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const s_apellido = document.getElementById('s-apellido')?.value.trim() || '';
     const fechaNac   = document.getElementById('fecha-nac')?.value         || '';
     const horasCel   = document.getElementById('uso-telefono')?.value      || '';
-    const appTop     = document.getElementById('apps')?.value              || '';
+    const appsSelect = document.getElementById('apps')?.value              || '';
+    const appsOtra   = document.getElementById('apps-otra')?.value.trim()  || '';
+    const appTop     = appsSelect === 'otras' ? appsOtra : appsSelect;
 
     // ID numérico del catálogo (viene del value=id)
     const id_genero  = document.getElementById('genero')?.value  || '';
