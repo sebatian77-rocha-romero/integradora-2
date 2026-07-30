@@ -536,8 +536,73 @@ details {
     text-align: center;
     text-shadow: 0 0 20px currentColor;
     transition: opacity .1s;
-    margin:  10px;
-    
+    margin: 10px;
+}
+
+.est--ready {
+    font-size: 1.2rem;
+    color: #00e676;
+}
+
+.est--countdown {
+    font-size: 6rem;
+}
+
+.est--warning {
+    color: #ffaa00;
+}
+
+.est--danger {
+    color: #ff4444;
+}
+
+.est--success {
+    color: #00e676;
+}
+
+.est--sart {
+    color: #00e676;
+}
+
+.est--stroop {
+    color: #00e676;
+}
+
+.est--nback {
+    color: #7b2fff;
+}
+
+.btn-iniciar-test {
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    padding: .7rem 2rem;
+    background: transparent;
+    border: 1px solid #00e676;
+    border-radius: 4px;
+    color: #00e676;
+    cursor: pointer;
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+.btn-iniciar-test.is-hidden {
+    display: none;
+}
+
+.btn-iniciar-test--sart {
+    border-color: #00e676;
+    color: #00e676;
+}
+
+.btn-iniciar-test--stroop {
+    border-color: #00e676;
+    color: #00e676;
+}
+
+.btn-iniciar-test--nback {
+    border-color: #7b2fff;
+    color: #7b2fff;
 }
 
 /* Botones de color */

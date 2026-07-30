@@ -330,37 +330,38 @@ function nbackCountdown(callback) {
   const detail = nbackDetail();
   const estEl  = nbackGet('.est');
   if (!estEl) { callback(); return; }
- 
-  estEl.style.fontSize = '1.2rem';
-  estEl.style.color    = '#7b2fff';
-  estEl.textContent    = '';
- 
+
+  estEl.textContent = '';
+  estEl.classList.remove('est--ready', 'est--countdown', 'est--warning', 'est--danger', 'est--success', 'est--sart', 'est--stroop', 'est--nback');
+  estEl.classList.add('est--ready', 'est--nback');
+
   let btn = detail.querySelector('.btn-iniciar-test');
   if (!btn) {
     btn = document.createElement('button');
-    btn.className   = 'btn-iniciar-test';
+    btn.className = 'btn-iniciar-test btn-iniciar-test--nback';
     btn.textContent = '[ INICIAR TEST ]';
-    btn.style.cssText = 'font-family:VT323,monospace;font-size:1.4rem;letter-spacing:3px;padding:.7rem 2rem;background:transparent;border:1px solid #7b2fff;border-radius:4px;color:#7b2fff;cursor:pointer;margin-top:1rem;';
     estEl.after(btn);
   }
-  btn.style.display = 'inline-block';
- 
+  btn.classList.remove('is-hidden');
+
   btn.onclick = () => {
-    btn.style.display = 'none';
+    btn.classList.add('is-hidden');
     let count = 3;
-    estEl.style.fontSize = '6rem';
-    estEl.textContent    = count;
-    estEl.style.color    = '#7b2fff';
- 
+    estEl.textContent = count;
+    estEl.classList.remove('est--ready', 'est--warning', 'est--danger', 'est--success');
+    estEl.classList.add('est--countdown', 'est--nback');
+
     const iv = setInterval(() => {
       count--;
       if (count > 0) {
         estEl.textContent = count;
-        estEl.style.color = count === 2 ? '#ffaa00' : '#ff4444';
+        estEl.classList.remove('est--warning', 'est--danger', 'est--success');
+        estEl.classList.add(count === 2 ? 'est--warning' : 'est--danger');
       } else {
         clearInterval(iv);
         estEl.textContent = '¡YA!';
-        estEl.style.color = '#00e676';
+        estEl.classList.remove('est--warning', 'est--danger');
+        estEl.classList.add('est--countdown', 'est--success', 'est--nback');
         setTimeout(callback, 400);
       }
     }, 800);
