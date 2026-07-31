@@ -240,15 +240,6 @@ function renderInterpretaciones() {
   }
 }
 
-// ── Iconos por dimensión (para la caja destacada de la IA) ──
-function iconoDimension(dim) {
-  if (!dim) return '⬡';
-  if (dim.includes('Stroop')) return '<i class="fi fi-rs-target"></i>';
-  if (dim.includes('SART')) return '<i class="fi fi-rs-stopwatch"></i>';
-  if (dim.includes('N-Back')) return '<i class="fi fi-rs-brain"></i>';
-  return '⬡';
-}
-
 // ── Efecto de "escritura" para el resumen ─────
 function escribirTexto(el, texto, onDone) {
   el.classList.remove('muted');
@@ -268,35 +259,92 @@ function escribirTexto(el, texto, onDone) {
 
 // ── Construir las tarjetas visuales a partir del JSON de la IA ──
 function renderRetroEstructurada(data) {
-  const out       = document.getElementById('ia-out');
-  const dimBox    = document.getElementById('ia-dimension');
-  const recosGrid = document.getElementById('ia-recos');
+    const out       = document.getElementById('ia-out');
+    const dimBox    = document.getElementById('ia-dimension');
+    const recosGrid = document.getElementById('ia-recos');
 
-  // 1. Resumen con efecto de escritura
-  escribirTexto(out, data.resumen || '', () => {
-    // 2. Caja de dimensión más afectada (aparece cuando termina el resumen)
-    dimBox.innerHTML = `
-      <div class="ia-dimension-icon">${iconoDimension(dimension_mas_afectada)}</div>
-      <div class="ia-dimension-text">
-        <div class="ia-dimension-label">DIMENSIÓN CON MAYOR OPORTUNIDAD DE MEJORA</div>
-        <div class="ia-dimension-nombre">${dimension_mas_afectada || ''}</div>
-        <div class="ia-dimension-expl">${data.explicacion_dimension || ''}</div>
-      </div>`;
-    dimBox.classList.add('show');
+    // 1. Resumen con efecto de escritura
+    escribirTexto(out, data.resumen || '', () => {
+        // 2. Ocultar todos los iconos primero
+        document.querySelectorAll('.dim-icon').forEach(el => {
+            el.classList.remove('active');
+        });
 
-    // 3. Tarjetas de recomendaciones
-    recosGrid.innerHTML = '';
-    (data.recomendaciones || []).forEach((r, idx) => {
-      const card = document.createElement('div');
-      card.className = 'ia-reco-card';
-      card.innerHTML = `
-        <div class="ia-reco-num">${idx + 1}</div>
-        <div class="ia-reco-titulo">${r.titulo || ''}</div>
-        <div class="ia-reco-texto">${r.texto || ''}</div>`;
-      recosGrid.appendChild(card);
+        // 3. Mostrar el icono correspondiente a la dimensión
+        if (dimension_mas_afectada) {
+            if (dimension_mas_afectada.includes('Stroop')) {
+                document.getElementById('icon-stroop').classList.add('active');
+            } else if (dimension_mas_afectada.includes('SART')) {
+                document.getElementById('icon-sart').classList.add('active');
+            } else if (dimension_mas_afectada.includes('N-Back')) {
+                document.getElementById('icon-nback').classList.add('active');
+            }
+        }
+
+        // 4. Actualizar textos de la caja de dimensión
+        document.getElementById('dim-nombre').textContent = dimension_mas_afectada || 'No determinada';
+        document.getElementById('dim-explicacion').textContent = data.explicacion_dimension || '';
+
+        // 5. Mostrar la caja de dimensión
+        dimBox.classList.add('show');
+
+        // 6. Tarjetas de recomendaciones
+        recosGrid.innerHTML = '';
+        (data.recomendaciones || []).forEach((r, idx) => {
+            const card = document.createElement('div');
+            card.className = 'ia-reco-card';
+            card.innerHTML = `
+                <div class="ia-reco-num">${idx + 1}</div>
+                <div class="ia-reco-titulo">${r.titulo || ''}</div>
+                <div class="ia-reco-texto">${r.texto || ''}</div>`;
+            recosGrid.appendChild(card);
+        });
+        recosGrid.classList.add('show');
     });
-    recosGrid.classList.add('show');
-  });
+}// ── Construir las tarjetas visuales a partir del JSON de la IA ──
+function renderRetroEstructurada(data) {
+    const out       = document.getElementById('ia-out');
+    const dimBox    = document.getElementById('ia-dimension');
+    const recosGrid = document.getElementById('ia-recos');
+
+    // 1. Resumen con efecto de escritura
+    escribirTexto(out, data.resumen || '', () => {
+        // 2. Ocultar todos los iconos primero
+        document.querySelectorAll('.dim-icon').forEach(el => {
+            el.classList.remove('active');
+        });
+
+        // 3. Mostrar el icono correspondiente a la dimensión
+        if (dimension_mas_afectada) {
+            if (dimension_mas_afectada.includes('Stroop')) {
+                document.getElementById('icon-stroop').classList.add('active');
+            } else if (dimension_mas_afectada.includes('SART')) {
+                document.getElementById('icon-sart').classList.add('active');
+            } else if (dimension_mas_afectada.includes('N-Back')) {
+                document.getElementById('icon-nback').classList.add('active');
+            }
+        }
+
+        // 4. Actualizar textos de la caja de dimensión
+        document.getElementById('dim-nombre').textContent = dimension_mas_afectada || 'No determinada';
+        document.getElementById('dim-explicacion').textContent = data.explicacion_dimension || '';
+
+        // 5. Mostrar la caja de dimensión
+        dimBox.classList.add('show');
+
+        // 6. Tarjetas de recomendaciones
+        recosGrid.innerHTML = '';
+        (data.recomendaciones || []).forEach((r, idx) => {
+            const card = document.createElement('div');
+            card.className = 'ia-reco-card';
+            card.innerHTML = `
+                <div class="ia-reco-num">${idx + 1}</div>
+                <div class="ia-reco-titulo">${r.titulo || ''}</div>
+                <div class="ia-reco-texto">${r.texto || ''}</div>`;
+            recosGrid.appendChild(card);
+        });
+        recosGrid.classList.add('show');
+    });
 }
 
 // ── Parsear la respuesta de la IA (tolerante a fences ```json) ──
