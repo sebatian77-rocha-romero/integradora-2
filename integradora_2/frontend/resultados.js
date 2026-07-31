@@ -243,9 +243,9 @@ function renderInterpretaciones() {
 // ── Iconos por dimensión (para la caja destacada de la IA) ──
 function iconoDimension(dim) {
   if (!dim) return '⬡';
-  if (dim.includes('Stroop'))  return '🎯';
-  if (dim.includes('SART'))    return '⏱';
-  if (dim.includes('N-Back'))  return '🧠';
+  if (dim.includes('Stroop'))  return 'fa-solid fa-bullseye';
+  if (dim.includes('SART'))    return 'fa-solid fa-stopwatch';
+  if (dim.includes('N-Back'))  return 'fa-solid fa-brain';
   return '⬡';
 }
 
