@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────
 //  resultados.js
 //  Carga los datos del participante desde:
-//  1. sessionStorage (si viene directo del test)
-//  2. GET /api/sesion/:id (si viene por URL ?id=N)
+//  sessionStorage (si viene directo del test)
+// GET /api/sesion/:id (si viene por URL ?id=N)
 //  Rellena la página y genera retroalimentación con IA.
 // ─────────────────────────────────────────────
 
 let usuario = {}, stroop = {}, sart = {}, nback = {};
-let diemnsionmasafectada = null;
+let dimensionMasAfectada = null; // se calcula en renderInterpretaciones()
 
 // ── Determinar fuente de datos ────────────────
 async function cargarDatos() {
@@ -226,7 +226,7 @@ function renderInterpretaciones() {
     :             'Memoria de trabajo baja (' + pct + '%). El 2-back resultó exigente, lo cual se asocia con alta exposición a contenido de formato corto.';
   }
 
-  // dimension más afectada   (se guarda la variable para la ia))
+  // Dimensión más afectada (se guarda en variable global para reusarla en la IA)
   const peorMap = {
     'Atención selectiva (Stroop)': stroop.efecto_stroop_ms > 200 ? 0 : stroop.efecto_stroop_ms > 150 ? 1 : 2,
     'Atención sostenida (SART)':   (sart.errores_comision + sart.errores_omision) > 5 ? 0 : (sart.errores_comision + sart.errores_omision) > 2 ? 1 : 2,
@@ -239,7 +239,7 @@ function renderInterpretaciones() {
       peor[0] + ' — presenta mayor oportunidad de mejora según los resultados obtenidos.';
   }
 }
- 
+
 // ── Iconos por dimensión (para la caja destacada de la IA) ──
 function iconoDimension(dim) {
   if (!dim) return '⬡';
@@ -248,8 +248,8 @@ function iconoDimension(dim) {
   if (dim.includes('N-Back'))  return '🧠';
   return '⬡';
 }
- 
-// Efecto de "escritura" para el resumen
+
+// ── Efecto de "escritura" para el resumen ─────
 function escribirTexto(el, texto, onDone) {
   el.classList.remove('muted');
   el.innerHTML = '';
@@ -265,13 +265,13 @@ function escribirTexto(el, texto, onDone) {
     }
   })();
 }
- 
+
 // ── Construir las tarjetas visuales a partir del JSON de la IA ──
 function renderRetroEstructurada(data) {
   const out       = document.getElementById('ia-out');
   const dimBox    = document.getElementById('ia-dimension');
   const recosGrid = document.getElementById('ia-recos');
- 
+
   // 1. Resumen con efecto de escritura
   escribirTexto(out, data.resumen || '', () => {
     // 2. Caja de dimensión más afectada (aparece cuando termina el resumen)
@@ -283,7 +283,7 @@ function renderRetroEstructurada(data) {
         <div class="ia-dimension-expl">${data.explicacion_dimension || ''}</div>
       </div>`;
     dimBox.classList.add('show');
- 
+
     // 3. Tarjetas de recomendaciones
     recosGrid.innerHTML = '';
     (data.recomendaciones || []).forEach((r, idx) => {
@@ -298,21 +298,21 @@ function renderRetroEstructurada(data) {
     recosGrid.classList.add('show');
   });
 }
- 
+
 // ── Parsear la respuesta de la IA (tolerante a fences ```json) ──
 function parsearRespuestaIA(texto) {
   let limpio = texto.trim();
   limpio = limpio.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '');
   return JSON.parse(limpio);
 }
- 
-// Retroalimentación IA 
+
+// ── Retroalimentación IA ──────────────────────
 async function generarRetro() {
   const btn       = document.getElementById('ia-btn');
   const out       = document.getElementById('ia-out');
   const dimBox    = document.getElementById('ia-dimension');
   const recosGrid = document.getElementById('ia-recos');
- 
+
   btn.disabled    = true;
   btn.textContent = '[ ANALIZANDO... ]';
   out.className   = 'ia-body muted';
@@ -321,20 +321,20 @@ async function generarRetro() {
   recosGrid.classList.remove('show');
   dimBox.innerHTML = '';
   recosGrid.innerHTML = '';
- 
+
   const app = Array.isArray(usuario.apps_distractoras)
     ? usuario.apps_distractoras[0]
     : usuario.apps_distractoras || usuario.appTop || '—';
- 
+
   const prompt = `Eres un psicólogo educativo de la Universidad Tecnológica de Durango. Un estudiante acaba de completar una evaluación cognitiva. Sus resultados son:
- 
+
 Test Stroop (atención selectiva): efecto de ${stroop.efecto_stroop_ms || '—'} ms (esperado 120-150 ms), tasa de error ${stroop.tasa_error_pct || '—'}%.
 Test SART (atención sostenida): ${sart.errores_comision || 0} comisiones, ${sart.errores_omision || 0} omisiones, variabilidad ±${sart.rt_desviacion_ms || '—'} ms.
 Test N-Back 2-back (memoria de trabajo): ${nback.pct_aciertos || '—'}% de aciertos (umbral esperado 75%).
 Perfil: ${usuario.horas_celular || '—'} horas de celular al día. App principal: ${app}.
- 
+
 La dimensión con mayor oportunidad de mejora, ya calculada a partir de los datos, es: "${dimensionMasAfectada || 'no determinada'}". Da esa dimensión por correcta, no la vuelvas a evaluar tú.
- 
+
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional antes ni después, sin markdown ni backticks, con exactamente esta estructura:
 {
   "resumen": "1 párrafo corto (3-4 líneas), lenguaje simple, sin números técnicos, explicando en general qué dicen los resultados",
@@ -344,9 +344,9 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional antes ni de
     {"titulo": "título de 3-5 palabras", "texto": "1-2 oraciones con otra recomendación concreta y práctica, distinta de la primera"}
   ]
 }
- 
+
 Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Sin tecnicismos.`;
- 
+
   try {
     const res = await fetch('/api/sesion/retroalimentacion', {
       method:  'POST',
@@ -355,7 +355,7 @@ Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Si
     });
     const data  = await res.json();
     const texto = data.texto || '';
- 
+
     let estructurado;
     try {
       estructurado = parsearRespuestaIA(texto);
@@ -367,11 +367,11 @@ Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Si
       btn.disabled    = false;
       return;
     }
- 
+
     renderRetroEstructurada(estructurado);
     btn.textContent = '[ REGENERAR ]';
     btn.disabled    = false;
- 
+
   } catch (err) {
     console.error('[SEMK] Error IA:', err);
     out.className   = 'ia-body muted';
@@ -380,6 +380,6 @@ Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Si
     btn.disabled    = false;
   }
 }
- 
+
 // ── Arrancar ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', cargarDatos);
