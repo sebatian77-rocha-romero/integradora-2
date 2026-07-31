@@ -1115,14 +1115,44 @@ h2.coral  { color: var(--green); }
   margin-top: 10px;
 }
 
+
+.instruccion-1, .instruccion-2, .instruccion-3, .instruccion-4 {
+    border: 2px solid #38BDF8;
+    margin: 20px auto;
+    padding: 20px;
+    width: 80%;
+    color: #F8FAFC;
+    font-size: clamp(14px, 2vw, 18px);
+    position: relative;
+    z-index: 10;
+    background: rgba(30, 41, 59, 0.9);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.instruccion-1:hover, .instruccion-2:hover, 
+.instruccion-3:hover, .instruccion-4:hover {
+    transform: translateX(-24px);
+    box-shadow: 3px 3px 3px 3px rgba(56, 189, 248, 0.55);
+}
+
+
 /*consentimiento informado*/
 .consentimiento {
-  max-width: 720px; margin: 1.5rem auto;
-  border: 1px solid var(--cyan);
-  border-radius: 4px;
-  padding: 1rem 1.25rem;
-  background: var(--surface);
+    max-width: 720px; margin: 1.5rem auto;
+    border: 1px solid var(--cyan);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    position: relative;
+    z-index: 10;
+    background: rgba(30, 41, 59, 0.9);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
+
+.consentimiento:hover{
+    transform: translateX(-24px);
+    box-shadow: 3px 3px 3px 3px rgba(56, 189, 248, 0.55);
+}
+
 .consentimiento-aviso {
   font-size: .85rem; color: var(--text);
   line-height: 1.7; margin: 0 0 .9rem;
