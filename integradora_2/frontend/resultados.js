@@ -242,22 +242,11 @@ function renderInterpretaciones() {
 
 // ── Iconos por dimensión (para la caja destacada de la IA) ──
 function iconoDimension(dim) {
-  const mainIcon = document.getElementById('ia-icon-main');
-  const dimensionIcon = document.getElementById('ia-dimension-icon');
-  const classes = {
-    default: 'fi fi-rs-circle',
-    stroop: 'fi fi-rs-target',
-    sart: 'fi fi-rs-stopwatch',
-    nback: 'fi fi-rs-brain'
-  };
-
-  let iconClass = classes.default;
-  if (dim && dim.includes('Stroop')) iconClass = classes.stroop;
-  else if (dim && dim.includes('SART')) iconClass = classes.sart;
-  else if (dim && dim.includes('N-Back')) iconClass = classes.nback;
-
-  if (mainIcon) mainIcon.className = 'ia-icon ' + (iconClass === classes.default ? '' : 'active');
-  if (dimensionIcon) dimensionIcon.className = iconClass;
+  if (!dim) return '⬡';
+  if (dim.includes('Stroop')) return '<i class="fi fi-rs-target"></i>';
+  if (dim.includes('SART')) return '<i class="fi fi-rs-stopwatch"></i>';
+  if (dim.includes('N-Back')) return '<i class="fi fi-rs-brain"></i>';
+  return '⬡';
 }
 
 // ── Efecto de "escritura" para el resumen ─────
@@ -286,11 +275,13 @@ function renderRetroEstructurada(data) {
   // 1. Resumen con efecto de escritura
   escribirTexto(out, data.resumen || '', () => {
     // 2. Caja de dimensión más afectada (aparece cuando termina el resumen)
-    const nombreEl = document.getElementById('ia-dimension-nombre');
-    const explEl = document.getElementById('ia-dimension-expl');
-    if (nombreEl) nombreEl.textContent = dimension_mas_afectada || '';
-    if (explEl) explEl.textContent = data.explicacion_dimension || '';
-    iconoDimension(dimension_mas_afectada);
+    dimBox.innerHTML = `
+      <div class="ia-dimension-icon">${iconoDimension(dimension_mas_afectada)}</div>
+      <div class="ia-dimension-text">
+        <div class="ia-dimension-label">DIMENSIÓN CON MAYOR OPORTUNIDAD DE MEJORA</div>
+        <div class="ia-dimension-nombre">${dimension_mas_afectada || ''}</div>
+        <div class="ia-dimension-expl">${data.explicacion_dimension || ''}</div>
+      </div>`;
     dimBox.classList.add('show');
 
     // 3. Tarjetas de recomendaciones
