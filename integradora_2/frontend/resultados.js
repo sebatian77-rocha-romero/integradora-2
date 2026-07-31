@@ -276,7 +276,9 @@ function renderRetroEstructurada(data) {
   escribirTexto(out, data.resumen || '', () => {
     // 2. Caja de dimensión más afectada (aparece cuando termina el resumen)
     dimBox.innerHTML = `
-      <div class="ia-dimension-icon">${iconoDimension(dimension_mas_afectada)}</div>
+      <div class="ia-dimension-icon">
+        <i class="${iconoDimension(dimension_mas_afectada)}"></i>
+      </div>
       <div class="ia-dimension-text">
         <div class="ia-dimension-label">DIMENSIÓN CON MAYOR OPORTUNIDAD DE MEJORA</div>
         <div class="ia-dimension-nombre">${dimension_mas_afectada || ''}</div>
