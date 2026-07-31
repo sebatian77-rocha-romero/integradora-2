@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Resultados/title>
     <link rel="stylesheet" href="./css/estilos.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
@@ -70,9 +70,7 @@
     </div>
  
     <div class="subtitulo">RETROALIMENTACIÓN IA</div>
-    <div class="min_instruccion">
-        <p>Retroalimentacion con IA temporalmente fuera de servicio por faalta de presupuesto</p>
-    </div>
+
     <div class="ia-card">
         <div class="ia-header">
             <div class="ia-icon">⬡</div>
@@ -82,13 +80,15 @@
             </div>
         </div>
         <div class="ia-body muted" id="ia-out">Pulsa el botón para recibir tu retroalimentación.</div>
+        <div class="ia-dimension-box" id="ia-dimension"></div>
+        <div class="ia-reco-grid" id="ia-recos"></div>
         <button class="ia-btn" id="ia-btn" onclick="generarRetro()">[ GENERAR RETROALIMENTACIÓN ]</button>
     </div>
  
     <div class="privacy-note">
         DATOS USADOS EXCLUSIVAMENTE CON FINES DE INVESTIGACIÓN ACADÉMICA · UTD 2026
     </div>
-
+ 
 
     <script src="./resultados.js"></script>
 </body>

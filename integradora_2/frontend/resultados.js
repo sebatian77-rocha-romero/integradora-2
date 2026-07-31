@@ -7,6 +7,7 @@
 // ─────────────────────────────────────────────
 
 let usuario = {}, stroop = {}, sart = {}, nback = {};
+let diemnsionmasafectada = null;
 
 // ── Determinar fuente de datos ────────────────
 async function cargarDatos() {
@@ -225,7 +226,7 @@ function renderInterpretaciones() {
     :             'Memoria de trabajo baja (' + pct + '%). El 2-back resultó exigente, lo cual se asocia con alta exposición a contenido de formato corto.';
   }
 
-  // Dimensión más afectada
+  // dimension más afectada   (se guarda la variable para la ia))
   const peorMap = {
     'Atención selectiva (Stroop)': stroop.efecto_stroop_ms > 200 ? 0 : stroop.efecto_stroop_ms > 150 ? 1 : 2,
     'Atención sostenida (SART)':   (sart.errores_comision + sart.errores_omision) > 5 ? 0 : (sart.errores_comision + sart.errores_omision) > 2 ? 1 : 2,
@@ -233,33 +234,119 @@ function renderInterpretaciones() {
   };
   const peor = Object.entries(peorMap).sort((a, b) => a[1] - b[1])[0];
   if (peor) {
+    dimensionMasAfectada = peor[0];
     document.getElementById('int-peor').textContent =
       peor[0] + ' — presenta mayor oportunidad de mejora según los resultados obtenidos.';
   }
 }
-
-// ── Retroalimentación IA ──────────────────────
+ 
+// ── Iconos por dimensión (para la caja destacada de la IA) ──
+function iconoDimension(dim) {
+  if (!dim) return '⬡';
+  if (dim.includes('Stroop'))  return '🎯';
+  if (dim.includes('SART'))    return '⏱';
+  if (dim.includes('N-Back'))  return '🧠';
+  return '⬡';
+}
+ 
+// Efecto de "escritura" para el resumen
+function escribirTexto(el, texto, onDone) {
+  el.classList.remove('muted');
+  el.innerHTML = '';
+  let i = 0;
+  (function tick() {
+    if (i < texto.length) {
+      el.innerHTML = texto.slice(0, i + 1) + '<span class="cursor"></span>';
+      i++;
+      setTimeout(tick, 10);
+    } else {
+      el.innerHTML = texto;
+      if (onDone) onDone();
+    }
+  })();
+}
+ 
+// ── Construir las tarjetas visuales a partir del JSON de la IA ──
+function renderRetroEstructurada(data) {
+  const out       = document.getElementById('ia-out');
+  const dimBox    = document.getElementById('ia-dimension');
+  const recosGrid = document.getElementById('ia-recos');
+ 
+  // 1. Resumen con efecto de escritura
+  escribirTexto(out, data.resumen || '', () => {
+    // 2. Caja de dimensión más afectada (aparece cuando termina el resumen)
+    dimBox.innerHTML = `
+      <div class="ia-dimension-icon">${iconoDimension(dimensionMasAfectada)}</div>
+      <div class="ia-dimension-text">
+        <div class="ia-dimension-label">DIMENSIÓN CON MAYOR OPORTUNIDAD DE MEJORA</div>
+        <div class="ia-dimension-nombre">${dimensionMasAfectada || ''}</div>
+        <div class="ia-dimension-expl">${data.explicacion_dimension || ''}</div>
+      </div>`;
+    dimBox.classList.add('show');
+ 
+    // 3. Tarjetas de recomendaciones
+    recosGrid.innerHTML = '';
+    (data.recomendaciones || []).forEach((r, idx) => {
+      const card = document.createElement('div');
+      card.className = 'ia-reco-card';
+      card.innerHTML = `
+        <div class="ia-reco-num">${idx + 1}</div>
+        <div class="ia-reco-titulo">${r.titulo || ''}</div>
+        <div class="ia-reco-texto">${r.texto || ''}</div>`;
+      recosGrid.appendChild(card);
+    });
+    recosGrid.classList.add('show');
+  });
+}
+ 
+// ── Parsear la respuesta de la IA (tolerante a fences ```json) ──
+function parsearRespuestaIA(texto) {
+  let limpio = texto.trim();
+  limpio = limpio.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '');
+  return JSON.parse(limpio);
+}
+ 
+// Retroalimentación IA 
 async function generarRetro() {
-  const btn = document.getElementById('ia-btn');
-  const out = document.getElementById('ia-out');
+  const btn       = document.getElementById('ia-btn');
+  const out       = document.getElementById('ia-out');
+  const dimBox    = document.getElementById('ia-dimension');
+  const recosGrid = document.getElementById('ia-recos');
+ 
   btn.disabled    = true;
   btn.textContent = '[ ANALIZANDO... ]';
   out.className   = 'ia-body muted';
   out.innerHTML   = 'Procesando tu perfil cognitivo<span class="cursor"></span>';
-
+  dimBox.classList.remove('show');
+  recosGrid.classList.remove('show');
+  dimBox.innerHTML = '';
+  recosGrid.innerHTML = '';
+ 
   const app = Array.isArray(usuario.apps_distractoras)
     ? usuario.apps_distractoras[0]
     : usuario.apps_distractoras || usuario.appTop || '—';
-
+ 
   const prompt = `Eres un psicólogo educativo de la Universidad Tecnológica de Durango. Un estudiante acaba de completar una evaluación cognitiva. Sus resultados son:
-
+ 
 Test Stroop (atención selectiva): efecto de ${stroop.efecto_stroop_ms || '—'} ms (esperado 120-150 ms), tasa de error ${stroop.tasa_error_pct || '—'}%.
 Test SART (atención sostenida): ${sart.errores_comision || 0} comisiones, ${sart.errores_omision || 0} omisiones, variabilidad ±${sart.rt_desviacion_ms || '—'} ms.
 Test N-Back 2-back (memoria de trabajo): ${nback.pct_aciertos || '—'}% de aciertos (umbral esperado 75%).
 Perfil: ${usuario.horas_celular || '—'} horas de celular al día. App principal: ${app}.
-
-Escribe una retroalimentación en español de exactamente 3 párrafos cortos. Párrafo 1: qué dicen los resultados en lenguaje simple, sin números técnicos. Párrafo 2: cuál dimensión está más afectada y por qué importa para el rendimiento académico diario. Párrafo 3: exactamente 2 recomendaciones concretas y prácticas que pueda aplicar esta semana. Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Sin tecnicismos.`;
-
+ 
+La dimensión con mayor oportunidad de mejora, ya calculada a partir de los datos, es: "${dimensionMasAfectada || 'no determinada'}". Da esa dimensión por correcta, no la vuelvas a evaluar tú.
+ 
+Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional antes ni después, sin markdown ni backticks, con exactamente esta estructura:
+{
+  "resumen": "1 párrafo corto (3-4 líneas), lenguaje simple, sin números técnicos, explicando en general qué dicen los resultados",
+  "explicacion_dimension": "1 párrafo corto (2-3 líneas) explicando por qué esa dimensión específica importa para el rendimiento académico diario",
+  "recomendaciones": [
+    {"titulo": "título de 3-5 palabras", "texto": "1-2 oraciones con una recomendación concreta y práctica"},
+    {"titulo": "título de 3-5 palabras", "texto": "1-2 oraciones con otra recomendación concreta y práctica, distinta de la primera"}
+  ]
+}
+ 
+Tono: empático, directo, motivador. Habla de tú. Sin diagnóstico clínico. Sin tecnicismos.`;
+ 
   try {
     const res = await fetch('/api/sesion/retroalimentacion', {
       method:  'POST',
@@ -267,23 +354,24 @@ Escribe una retroalimentación en español de exactamente 3 párrafos cortos. P�
       body:    JSON.stringify({ prompt })
     });
     const data  = await res.json();
-    const texto = data.texto || 'No se pudo generar la retroalimentación.';
-
-    out.className = 'ia-body';
-    out.innerHTML = '';
-    let i = 0;
-    (function type() {
-      if (i < texto.length) {
-        out.innerHTML = texto.slice(0, i + 1).replace(/\n\n/g, '<br><br>') + '<span class="cursor"></span>';
-        i++;
-        setTimeout(type, 10);
-      } else {
-        out.innerHTML   = texto.replace(/\n\n/g, '<br><br>');
-        btn.textContent = '[ REGENERAR ]';
-        btn.disabled    = false;
-      }
-    })();
-
+    const texto = data.texto || '';
+ 
+    let estructurado;
+    try {
+      estructurado = parsearRespuestaIA(texto);
+    } catch (parseErr) {
+      // Fallback: si la IA no devolvió JSON válido, mostrar el texto plano
+      console.warn('[SEMK] La IA no devolvió JSON válido, mostrando texto plano.', parseErr);
+      escribirTexto(out, texto.replace(/\n\n/g, '<br><br>') || 'No se pudo generar la retroalimentación.');
+      btn.textContent = '[ REGENERAR ]';
+      btn.disabled    = false;
+      return;
+    }
+ 
+    renderRetroEstructurada(estructurado);
+    btn.textContent = '[ REGENERAR ]';
+    btn.disabled    = false;
+ 
   } catch (err) {
     console.error('[SEMK] Error IA:', err);
     out.className   = 'ia-body muted';
@@ -292,6 +380,6 @@ Escribe una retroalimentación en español de exactamente 3 párrafos cortos. P�
     btn.disabled    = false;
   }
 }
-
+ 
 // ── Arrancar ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', cargarDatos);
