@@ -55,10 +55,10 @@
  
     <div class="grafica-card">
         <div class="grafica-title">TIEMPO DE REACCIÓN COMPARATIVO</div>
-        <div class="bar-row"><div class="bar-label">STROOP CONG.</div><div class="bar-bg"><div class="bar-fill bf-violet" id="bar-stc" style="width:0%">—</div></div></div>
-        <div class="bar-row"><div class="bar-label">STROOP INCONG.</div><div class="bar-bg"><div class="bar-fill bf-violet" id="bar-sti" style="width:0%">—</div></div></div>
-        <div class="bar-row"><div class="bar-label">SART PROM.</div><div class="bar-bg"><div class="bar-fill bf-green" id="bar-sa" style="width:0%">—</div></div></div>
-        <div class="bar-row"><div class="bar-label">N-BACK PROM.</div><div class="bar-bg"><div class="bar-fill bf-coral" id="bar-nb" style="width:0%">—</div></div></div>
+        <div class="bar-row"><div class="bar-label">STROOP CONG.</div><div class="bar-bg"><div class="bar-fill bf-violet" id="bar-stc">—</div></div></div>
+        <div class="bar-row"><div class="bar-label">STROOP INCONG.</div><div class="bar-bg"><div class="bar-fill bf-violet" id="bar-sti">—</div></div></div>
+        <div class="bar-row"><div class="bar-label">SART PROM.</div><div class="bar-bg"><div class="bar-fill bf-green" id="bar-sa">—</div></div></div>
+        <div class="bar-row"><div class="bar-label">N-BACK PROM.</div><div class="bar-bg"><div class="bar-fill bf-coral" id="bar-nb">—</div></div></div>
     </div>
  
     <div class="subtitulo">INTERPRETACIÓN</div>
@@ -72,14 +72,21 @@
     <div class="subtitulo">RETROALIMENTACIÓN IA</div>
     <div class="ia-card">
         <div class="ia-header">
-            <div class="ia-icon">⬡</div>
+            <div class="ia-icon" id="ia-icon-main"><i class="fi fi-rs-circle"></i></div>
             <div>
                 <div class="ia-title">ANÁLISIS PERSONALIZADO</div>
                 <div class="ia-subtitle">Generado con base en tu perfil cognitivo y hábitos de uso digital</div>
             </div>
         </div>
         <div class="ia-body muted" id="ia-out">Pulsa el botón para recibir tu retroalimentación.</div>
-        <div class="ia-dimension-box" id="ia-dimension"></div>
+        <div class="ia-dimension-box" id="ia-dimension">
+            <div class="ia-dimension-icon"><i id="ia-dimension-icon" class="fi fi-rs-circle"></i></div>
+            <div class="ia-dimension-text">
+                <div class="ia-dimension-label">DIMENSIÓN CON MAYOR OPORTUNIDAD DE MEJORA</div>
+                <div class="ia-dimension-nombre" id="ia-dimension-nombre"></div>
+                <div class="ia-dimension-expl" id="ia-dimension-expl"></div>
+            </div>
+        </div>
         <div class="ia-reco-grid" id="ia-recos"></div>
         <button class="ia-btn" id="ia-btn" onclick="generarRetro()">[ GENERAR RETROALIMENTACIÓN ]</button>
     </div>

@@ -824,6 +824,9 @@ details {
 }
 .puntaje-label { font-size: .8rem; color: var(--dim); letter-spacing: 2px; }
 .puntaje-valor { font-size: 2.8rem; color: var(--cyan); line-height: 1; text-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
+.puntaje-valor.good { color: var(--green); text-shadow: 0 0 20px rgba(0, 230, 118, 0.35); }
+.puntaje-valor.warn { color: var(--amber); text-shadow: 0 0 20px rgba(255, 179, 0, 0.25); }
+.puntaje-valor.bad  { color: var(--red); text-shadow: 0 0 20px rgba(255, 82, 82, 0.25); }
 .puntaje-sub   { font-size: .8rem; color: var(--dim); }
  
 /* ── User info ── */
@@ -954,6 +957,7 @@ h2.coral  { color: var(--green); }
   height: 100%; border-radius: 2px;
   display: flex; align-items: center; justify-content: flex-end;
   padding-right: 8px; font-size: .8rem; font-weight: 500;
+  width: var(--bar-width, 0%);
   transition: width 1.2s cubic-bezier(.4,0,.2,1);
 }
 .bf-violet { background: rgba(56, 189, 248, 0.6); color: #a8e6f8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }

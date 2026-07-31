@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────
 
 let usuario = {}, stroop = {}, sart = {}, nback = {};
-let dimensionMasAfectada = null; // se calcula en renderInterpretaciones()
+let dimension_mas_afectada = null; // se calcula en renderInterpretaciones()
 
 // ── Determinar fuente de datos ────────────────
 async function cargarDatos() {
@@ -169,7 +169,7 @@ function renderScore() {
   const el = document.getElementById('score-val');
   if (!el) return;
   el.textContent = score;
-  el.style.color = score >= 80 ? '#00e676' : score >= 55 ? '#ffaa00' : '#ff4444';
+  el.className = 'puntaje-valor ' + (score >= 80 ? 'good' : score >= 55 ? 'warn' : 'bad');
 }
 
 // ── Barras RT ─────────────────────────────────
@@ -185,7 +185,7 @@ function renderBarras() {
     if (!el || !ms) return;
     el.textContent = ms + ' ms';
     setTimeout(() => {
-      el.style.width = Math.min(Math.round((ms / maxRT) * 100), 100) + '%';
+      el.style.setProperty('--bar-width', Math.min(Math.round((ms / maxRT) * 100), 100) + '%');
     }, 300);
   };
   setBar('bar-stc', stroop.rt_congruente_ms);
@@ -234,7 +234,7 @@ function renderInterpretaciones() {
   };
   const peor = Object.entries(peorMap).sort((a, b) => a[1] - b[1])[0];
   if (peor) {
-    dimensionMasAfectada = peor[0];
+    dimension_mas_afectada = peor[0];
     document.getElementById('int-peor').textContent =
       peor[0] + ' — presenta mayor oportunidad de mejora según los resultados obtenidos.';
   }
@@ -242,11 +242,22 @@ function renderInterpretaciones() {
 
 // ── Iconos por dimensión (para la caja destacada de la IA) ──
 function iconoDimension(dim) {
-  if (!dim) return '⬡';
-  if (dim.includes('Stroop'))  return '🎯';
-  if (dim.includes('SART'))    return '⏱';
-  if (dim.includes('N-Back'))  return '🧠';
-  return '⬡';
+  const mainIcon = document.getElementById('ia-icon-main');
+  const dimensionIcon = document.getElementById('ia-dimension-icon');
+  const classes = {
+    default: 'fi fi-rs-circle',
+    stroop: 'fi fi-rs-target',
+    sart: 'fi fi-rs-stopwatch',
+    nback: 'fi fi-rs-brain'
+  };
+
+  let iconClass = classes.default;
+  if (dim && dim.includes('Stroop')) iconClass = classes.stroop;
+  else if (dim && dim.includes('SART')) iconClass = classes.sart;
+  else if (dim && dim.includes('N-Back')) iconClass = classes.nback;
+
+  if (mainIcon) mainIcon.className = 'ia-icon ' + (iconClass === classes.default ? '' : 'active');
+  if (dimensionIcon) dimensionIcon.className = iconClass;
 }
 
 // ── Efecto de "escritura" para el resumen ─────
@@ -275,13 +286,11 @@ function renderRetroEstructurada(data) {
   // 1. Resumen con efecto de escritura
   escribirTexto(out, data.resumen || '', () => {
     // 2. Caja de dimensión más afectada (aparece cuando termina el resumen)
-    dimBox.innerHTML = `
-      <div class="ia-dimension-icon">${iconoDimension(dimensionMasAfectada)}</div>
-      <div class="ia-dimension-text">
-        <div class="ia-dimension-label">DIMENSIÓN CON MAYOR OPORTUNIDAD DE MEJORA</div>
-        <div class="ia-dimension-nombre">${dimensionMasAfectada || ''}</div>
-        <div class="ia-dimension-expl">${data.explicacion_dimension || ''}</div>
-      </div>`;
+    const nombreEl = document.getElementById('ia-dimension-nombre');
+    const explEl = document.getElementById('ia-dimension-expl');
+    if (nombreEl) nombreEl.textContent = dimension_mas_afectada || '';
+    if (explEl) explEl.textContent = data.explicacion_dimension || '';
+    iconoDimension(dimension_mas_afectada);
     dimBox.classList.add('show');
 
     // 3. Tarjetas de recomendaciones
@@ -333,7 +342,7 @@ Test SART (atención sostenida): ${sart.errores_comision || 0} comisiones, ${sar
 Test N-Back 2-back (memoria de trabajo): ${nback.pct_aciertos || '—'}% de aciertos (umbral esperado 75%).
 Perfil: ${usuario.horas_celular || '—'} horas de celular al día. App principal: ${app}.
 
-La dimensión con mayor oportunidad de mejora, ya calculada a partir de los datos, es: "${dimensionMasAfectada || 'no determinada'}". Da esa dimensión por correcta, no la vuelvas a evaluar tú.
+La dimensión con mayor oportunidad de mejora, ya calculada a partir de los datos, es: "${dimension_mas_afectada || 'no determinada'}". Da esa dimensión por correcta, no la vuelvas a evaluar tú.
 
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional antes ni después, sin markdown ni backticks, con exactamente esta estructura:
 {
