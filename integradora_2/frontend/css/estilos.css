@@ -1093,6 +1093,11 @@ h2.coral  { color: var(--green); }
 }
   
 
+.min_instruccion {
+  font-size: 1.15rem; color: var(--dim);
+  text-align: center; letter-spacing: 1px; line-height: 1.8;
+}
+
 .apps-otra {
   display: none;
   margin-top: 8px;
