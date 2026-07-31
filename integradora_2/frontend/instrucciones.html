@@ -15,29 +15,38 @@
     </div>
 
     <div class="instruccion-1">
-        <p>Acontinuacion se le aplicaran una serie de 3 pruebas para medir su capacidad de atencion, pero antes un breve formulario para recabar
-            informacion un poco mas detallada, la  prueba puede ser acabada en unlapso de tiempo no mayor a 10 minutos. acontinuacion se le 
-            explicara coomo se llevara acabo cada una de ellas.</p>
+        <p>
+            <strong>Antes de comenzar</strong>
+            <br>
+            Completa este breve formulario y luego realizarás 3 pruebas de atención. Duración total: máx. 10 minutos.
+        </p>
     </div>
 
     <div class="instruccion-2">
-        <p>TEST STROOP: Se te mostrarán palabras escritas en diferentes colores. Tu tarea es seleccionar el color de la tinta con la que está
-            escrita la palabra, ignorando lo que dice. Por ejemplo, si la palabra "ROJO" aparece escrita en color azul, la respuesta correcta es
-            azul. Responde lo más rápido que puedas sin cometer errores. Duración: 2 minutos 30 segundos.
+        <p>
+            <strong>STROOP (2:30 min)</strong>
+            <br>
+            Verás palabras escritas en distintos colores. Selecciona el color de la tinta, no lo que dice la palabra.
+            Ejemplo: si "ROJO" está escrito en azul, la respuesta correcta es azul.
+            Responde lo más rápido posible, sin cometer errores.
         </p>
     </div>
 
     <div class="instruccion-3">
-        <p>TEST SART: Se te presentarán números del 1 al 9 de forma secuencial. Debes presionar el botón RESPONDER cada vez que aparezca un número,
-            excepto cuando el número sea el 3 — en ese caso debes inhibir tu respuesta y no presionar nada. Cada número aparece brevemente en
-            pantalla, así que mantén la concentración durante todo el test. Duración: 3 minutos.</p>
+        <p>
+            <strong>TEST SART (3:00 min)</strong>
+            <br>
+            Aparecerán números del 1 al 9, uno a la vez. Presiona RESPONDER con cada número, excepto cuando sea el 3 — ahí no presiones nada.
+            Los números aparecen brevemente, mantén la concentración.
+        </p>
     </div>
 
     <div class="instruccion-4">
-        <p>TEST N-BACK: Se te mostrará una secuencia de letras, una a la vez. Tu tarea es indicar si la letra que ves es igual a la que apareció 3
-            posiciones antes en la secuencia. Por ejemplo, si la secuencia fue Z → A → A, la tercera letra coincide con la de hace 2 turnos,
-            por lo que debes presionar COINCIDEN. Si no coincide, no presiones nada. El test inicia con una fase de práctica breve para que te familiarices 
-            con la dinámica antes de la evaluación real. Duración: 2 minutos 30 segundos.
+        <p>
+            <strong>N-BACK (2:30 min)</strong>
+            Verás una secuencia de letras, una por una. Presiona COINCIDEN si la letra actual es igual a la que apareció 2 posiciones antes.
+            Ejemplo: A → B → A → presiona COINCIDEN (la 3ª letra coincide con la 1ª).
+            Habrá una práctica corta antes de empezar la prueba real.
         </p>
     </div>
 
@@ -56,9 +65,24 @@
         </ul>
     </div>
 
+   <div class="consentimiento">
+        <p class="consentimiento-aviso">
+            <strong>Aviso de privacidad:</strong> tus respuestas y resultados se recolectan únicamente con
+            fines de investigación académica de la Universidad Tecnológica de Durango (UTD). No se
+            comparten con terceros ni se usan con fines comerciales. Tu participación es voluntaria y
+            puedes detenerla en cualquier momento.
+        </p>
+        <label class="consentimiento-check">
+            <input type="checkbox" id="chk-consentimiento">
+            <span>He leído el aviso y acepto participar de forma voluntaria.</span>
+        </label>
+    </div>
+
+
     <a class="continuar" href="test.html">
         <span>Continuar</span>
     </a>
 
+    <script src="./instrucciones.js"></script>
 </body>
 </html>

@@ -1115,3 +1115,34 @@ h2.coral  { color: var(--green); }
   margin-top: 10px;
 }
 
+/*consentimiento informado*/
+.consentimiento {
+  max-width: 720px; margin: 1.5rem auto;
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+}
+.consentimiento-aviso {
+  font-size: .85rem; color: var(--text);
+  line-height: 1.7; margin: 0 0 .9rem;
+  text-align: left;
+}
+.consentimiento-check {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: .85rem; color: var(--dim);
+  cursor: pointer; line-height: 1.5;
+}
+.consentimiento-check input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px; height: 18px;
+  accent-color: var(--green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.consentimiento.shake { animation: consentimiento-shake .4s ease; border-color: #ff4444; }
+@keyframes consentimiento-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
