@@ -7,13 +7,13 @@
 // ─────────────────────────────────────────────
 
 let ultimaSesionId = null;
-
+ 
 async function chequearSesion() {
   try {
     const res  = await fetch('/api/auth/me');
     const data = await res.json();
     if (!data.logueado) return;
-
+ 
     // Ocultar "Iniciar sesión", convertir "Registrarme" en "Cerrar sesión"
     const navLogin = document.getElementById('nav-login');
     const navReg   = document.getElementById('nav-registro');
@@ -23,7 +23,7 @@ async function chequearSesion() {
       navReg.href = '#';
       navReg.addEventListener('click', cerrarSesion);
     }
-
+ 
     if (data.ultima_sesion_id) {
       ultimaSesionId = data.ultima_sesion_id;
       const textos = ['btn-ingresar-text', 'btn-ingresar-layer1', 'btn-ingresar-layer2'];
@@ -38,7 +38,7 @@ async function chequearSesion() {
     console.warn('[SEMK] No se pudo verificar la sesión:', err.message);
   }
 }
-
+ 
 function irSiguiente() {
   if (ultimaSesionId) {
     window.location.href = 'resultados.html?id=' + ultimaSesionId;
@@ -46,7 +46,7 @@ function irSiguiente() {
     window.location.href = 'instrucciones.html';
   }
 }
-
+ 
 async function cerrarSesion(e) {
   e.preventDefault();
   try {
@@ -56,5 +56,12 @@ async function cerrarSesion(e) {
   }
   window.location.reload();
 }
-
-document.addEventListener('DOMContentLoaded', chequearSesion);
+ 
+document.addEventListener('DOMContentLoaded', () => {
+  chequearSesion();
+ 
+  const btnIngresar = document.getElementById('btn-ingresar');
+  if (btnIngresar) {
+    btnIngresar.addEventListener('click', irSiguiente);
+  }
+});
