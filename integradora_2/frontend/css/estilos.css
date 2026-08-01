@@ -1198,3 +1198,79 @@ h2.coral  { color: var(--green); }
   20%, 60% { transform: translateX(-6px); }
   40%, 80% { transform: translateX(6px); }
 }
+
+
+/*boton de descarga de la apk*/
+.descargar-apk {
+  max-width: 480px;
+  margin: 30px auto;
+  text-align: center;
+  font-family: 'VT323', monospace;
+  color: #F8FAFC;
+  padding: 1.4rem 1.6rem;
+  border: 1px solid #22C55E55;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #0F172A 0%, #10241c 100%);
+}
+ 
+.descargar-apk p {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: #CBD5E1;
+}
+ 
+.descargar-apk p strong {
+  color: #F8FAFC;
+  letter-spacing: 1px;
+}
+ 
+.btn-descarga {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 0.65em 1.8em;
+  border: 2px solid #22C55E;
+  border-radius: 4px;
+  color: #22C55E;
+  background-color: transparent;
+  text-decoration: none;
+  overflow: hidden;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+ 
+.btn-descarga::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #22C55E;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+ 
+.btn-descarga:hover,
+.btn-descarga:focus {
+  color: #0F172A;
+}
+ 
+.btn-descarga:hover::before,
+.btn-descarga:focus::before {
+  transform: scaleX(1);
+}
+ 
+.btn-descarga:active {
+  transform: scale(0.95);
+}
+ 
+.btn-descarga::after {
+  content: '⬇';
+  font-size: 0.9em;
+}
