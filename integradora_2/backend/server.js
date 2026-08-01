@@ -29,6 +29,8 @@ const ORIGENES_PERMITIDOS = [
   'http://localhost:8081',   // expo start --web (Metro)
   'http://localhost:19006',  // expo start --web (puerto clásico de Expo)
   'http://localhost:3000',   // frontend servido en local por este mismo backend
+  'https://integradora-2-production.up.railway.app', // produccion (Railway)
+
 ];
  
 app.use(cors({
