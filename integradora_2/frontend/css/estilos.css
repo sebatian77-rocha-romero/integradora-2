@@ -311,6 +311,16 @@ a.continuar span {
     margin: 20px auto;
 }
 
+.auth-continuidad {
+  max-width: 720px; margin: 0 auto 1.2rem;
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  padding: .7rem 1rem;
+  text-align: center;
+  font-size: .9rem;
+  color: var(--green);
+  letter-spacing: 1px;
+}s
 
 
 .formulario h1 {
