@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro — S.E.M.K.</title>
+    <link rel="stylesheet" href="./css/estilos.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+    <section class="formulario">
+        <h1>CREAR CUENTA</h1>
+        <hr class="linea">
+
+        <div class="campo-grupo nombres">
+            <div class="campo">
+                <label for="p-apellido">Primer apellido:</label>
+                <input type="text" id="p-apellido" placeholder="Apellido">
+            </div>
+            <div class="campo">
+                <label for="s-apellido">Segundo apellido:</label>
+                <input type="text" id="s-apellido" placeholder="Apellido">
+            </div>
+            <div class="campo">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" placeholder="Nombre">
+            </div>
+        </div>
+
+        <div class="campo">
+            <label for="genero">Género</label>
+            <select id="genero">
+                <option value="">cargando...</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="fecha-nac">Fecha de nacimiento</label>
+            <input type="date" id="fecha-nac" name="fecha_nac">
+        </div>
+
+        <hr class="linea">
+
+        <div class="campo">
+            <label for="email">Correo electrónico (será tu usuario):</label>
+            <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+        </div>
+
+        <div class="campo">
+            <label for="pass">Contraseña:</label>
+            <input type="password" id="pass" placeholder="Mínimo 8 caracteres, con número y mayúscula" autocomplete="new-password">
+        </div>
+
+        <div class="campo">
+            <label for="c-pass">Confirmar contraseña:</label>
+            <input type="password" id="c-pass" placeholder="Repite tu contraseña" autocomplete="new-password">
+        </div>
+
+        <div class="auth-error" id="auth-error"></div>
+
+        <button class="continuar" id="btn-registro">CREAR CUENTA</button>
+
+        <p class="auth-alt">¿Ya tienes cuenta? <a href="inicio_sesion.html">Inicia sesión</a></p>
+    </section>
+
+    <script src="registro.js"></script>
+</body>
+</html>

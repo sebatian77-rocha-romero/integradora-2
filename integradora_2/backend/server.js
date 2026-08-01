@@ -6,9 +6,10 @@
 
 
 require('dotenv').config();
-const express = require('express');
-const cors    = require('cors');
-const path    = require('path');
+const express      = require('express');
+const cors         = require('cors');
+const path         = require('path');
+const cookieParser = require('cookie-parser');
 const { sequelize } = require('./models');
  
 const app  = express();
@@ -18,13 +19,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
  
 // ── Archivos estáticos del frontend ──────────
 app.use(express.static(path.join(__dirname, '../frontend')));
  
 // ── Rutas de la API ───────────────────────────
 const sesionRoutes = require('./routes/sesion.routes');
+const authRoutes    = require('./routes/auth.routes');
 app.use('/api/sesion', sesionRoutes);
+app.use('/api/auth', authRoutes);
  
 // ── Ruta de salud (Railway la usa para healthcheck) ──
 app.get('/api/health', (req, res) => {
@@ -40,7 +44,7 @@ app.get('/{*path}', (req, res) => {
 async function start() {
   try {
     await sequelize.authenticate();
-    console.log('✅ Conexión a MySQL establecida');
+    console.log('Conexión a MySQL establecida');
  
     // NOTA: la base de datos ya está creada por basededatos2.sql.
     // NO usamos sync({alter:true}) aquí porque intenta modificar en vivo
@@ -48,13 +52,13 @@ async function start() {
     // tumbar el arranque (ALTER TABLE fallando con ECONNRESET, por ejemplo).
     // Sequelize solo necesita autenticar; las tablas ya están listas para
     // recibir INSERT/SELECT a través de los modelos.
-    console.log('ℹ️  Usando el esquema existente de basededatos2.sql (sin sync/alter)');
+    console.log('ℹUsando el esquema existente de basededatos2.sql (sin sync/alter)');
  
     app.listen(PORT, () => {
-      console.log(`✅ Servidor SEMK corriendo en http://localhost:${PORT}`);
+      console.log(`Servidor SEMK corriendo en http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error('❌ Error al iniciar el servidor:', err);
+    console.error('Error al iniciar el servidor:', err);
     process.exit(1);
   }
 }

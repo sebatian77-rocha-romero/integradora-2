@@ -16,6 +16,18 @@ h1 {
     margin: 0;
 }
 
+a {
+    color: #38BDF8;
+    text-decoration: none;
+}
+
+.no-cuenta {
+    text-align: center;
+    color: #F8FAFC;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
 /*divs de las instrucciones*/
 .instruccion-1, .instruccion-2, .instruccion-3, .instruccion-4 {
     border: 2px solid #38BDF8;

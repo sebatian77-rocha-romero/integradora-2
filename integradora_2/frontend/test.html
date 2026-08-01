@@ -16,35 +16,41 @@
         <h1>FORMULARIO DE DATOS</h1>
         <hr class="linea">
 
-        <!-- Nombres -->
-        <div class="campo-grupo nombres">
-            <div class="campo">
-                <label for="p-apellido">Primer apellido:</label>
-                <input type="text" id="p-apellido" placeholder="Apellido">
+        <div class="auth-continuidad" id="auth-continuidad" style="display:none;"></div>
+
+        <div id="grupo-identidad">
+            <!-- Nombres -->
+            <div class="campo-grupo nombres">
+                <div class="campo">
+                    <label for="p-apellido">Primer apellido:</label>
+                    <input type="text" id="p-apellido" placeholder="Apellido">
+                </div>
+                <div class="campo">
+                    <label for="s-apellido">Segundo apellido:</label>
+                    <input type="text" id="s-apellido" placeholder="Apellido">
+                </div>
+                <div class="campo">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" placeholder="Nombre">
+                </div>
             </div>
+
+            <!-- Género -->
             <div class="campo">
-                <label for="s-apellido">Segundo apellido:</label>
-                <input type="text" id="s-apellido" placeholder="Apellido">
+                <label for="genero">Género</label>
+                <select id="genero">
+                    <option value="">cargando...</option>
+                </select>
             </div>
+
+            <!-- Fecha de nacimiento -->
             <div class="campo">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" placeholder="Nombre">
+                <label for="fecha-nac">Fecha de nacimiento</label>
+                <input type="date" id="fecha-nac" name="fecha_nac">
             </div>
         </div>
 
-        <!-- Género -->
-        <div class="campo">
-            <label for="genero">Género</label>
-            <select id="genero">
-                <option value="">cargando...</option>
-            </select>
-        </div>
-
-        <!-- Fecha de nacimiento -->
-        <div class="campo">
-            <label for="fecha-nac">Fecha de nacimiento</label>
-            <input type="date" id="fecha-nac" name="fecha_nac">
-        </div>
+        
 
         <!-- Carrera -->
         <div class="campo">

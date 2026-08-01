@@ -669,3 +669,41 @@ p {
     animation: none !important;
   }
 }
+
+.auth-nav {
+  position: relative;
+  z-index: 1;
+  font-family: 'VT323', monospace;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: clamp(13px, 2.2vw, 16px);
+  color: #38BDF8;
+  letter-spacing: 1px;
+  margin-top: -8px;
+}
+
+.auth-nav a, .auth-nav button {
+  color: #38BDF8;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.auth-nav a:hover, .auth-nav button:hover {
+  color: #F43F5E;
+}
+
+.auth-sep {
+  color: #38BDF8;
+  opacity: 0.6;
+}
+
+.rubik-glitch-regular {
+  font-family: "Rubik Glitch", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}

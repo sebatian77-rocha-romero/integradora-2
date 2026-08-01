@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión — S.E.M.K.</title>
+    <link rel="stylesheet" href="./css/estilos.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+    <section class="formulario formulario-angosto">
+        <h1>INICIAR SESIÓN</h1>
+        <hr class="linea">
+
+        <div class="campo">
+            <label for="email">Correo electrónico:</label>
+            <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+        </div>
+
+        <div class="campo">
+            <label for="pass">Contraseña:</label>
+            <input type="password" id="pass" placeholder="Tu contraseña" autocomplete="current-password">
+        </div>
+
+        <div class="auth-error" id="auth-error"></div>
+
+        <button class="continuar" id="btn-login">INICIAR SESIÓN</button>
+
+        <p class="no-cuenta">¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
+    </section>
+
+    <script src="inicio_sesion.js"></script>
+</body>
+</html>

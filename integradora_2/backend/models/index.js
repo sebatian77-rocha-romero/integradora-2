@@ -163,6 +163,15 @@ const ResultadoNback = sequelize.define('ResultadoNback', {
   duracion_total_ms: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
 }, { tableName: 'resultados_nback', timestamps: false });
  
+// ── Cuentas (registro / inicio de sesion) ─────
+const Cuenta = sequelize.define('Cuenta', {
+  id:           { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+  id_usuario:   { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, unique: true },
+  email:        { type: DataTypes.STRING(150), allowNull: false, unique: true },
+  password_hash:{ type: DataTypes.STRING(255), allowNull: false },
+  created_at:   { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+}, { tableName: 'cuentas', timestamps: false });
+
 // ── Asociaciones (reflejan las FKs del .sql) ──
 Genero.hasMany(Usuario, { foreignKey: 'id_genero' });
 Usuario.belongsTo(Genero, { foreignKey: 'id_genero' });
@@ -177,6 +186,9 @@ DatosDispositivo.belongsTo(Usuario, { foreignKey: 'id_usuario' });
  
 Usuario.hasMany(Sesion, { foreignKey: 'id_usuario', onDelete: 'CASCADE' });
 Sesion.belongsTo(Usuario, { foreignKey: 'id_usuario' });
+
+Usuario.hasOne(Cuenta, { foreignKey: 'id_usuario', onDelete: 'CASCADE' });
+Cuenta.belongsTo(Usuario, { foreignKey: 'id_usuario' });
  
 Sesion.hasOne(ComportamientoSesion, { foreignKey: 'id_sesion', onDelete: 'CASCADE' });
 ComportamientoSesion.belongsTo(Sesion, { foreignKey: 'id_sesion' });
@@ -203,4 +215,5 @@ module.exports = {
   Sesion, ComportamientoSesion,
   ResultadoStroop, StroopDetalle,
   ResultadoSart, ResultadoNback,
+  Cuenta,
 };

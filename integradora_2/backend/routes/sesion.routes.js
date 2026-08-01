@@ -56,52 +56,70 @@ router.get('/carreras', async (req, res) => {
 
 // ── POST /api/sesion/completa ─────────────────
 router.post('/completa', async (req, res) => {
-  const { usuario, academico, dispositivo, stroop, sart, nback, comportamiento } = req.body;
+  const { usuario, academico, dispositivo, stroop, sart, nback, comportamiento, id_usuario_existente } = req.body;
 
   console.log('[SEMK] POST /completa — usuario:', JSON.stringify(usuario));
   console.log('[SEMK] POST /completa — academico:', JSON.stringify(academico));
   console.log('[SEMK] POST /completa — dispositivo:', JSON.stringify(dispositivo));
+  console.log('[SEMK] POST /completa — id_usuario_existente:', id_usuario_existente);
 
-  if (!usuario || !academico || !stroop || !sart || !nback) {
-    return res.status(400).json({ ok: false, message: 'Faltan datos: usuario, academico, stroop, sart, nback.' });
+  if (!academico || !stroop || !sart || !nback) {
+    return res.status(400).json({ ok: false, message: 'Faltan datos: academico, stroop, sart, nback.' });
   }
-  if (!usuario.nombre || !usuario.p_apellido) {
-    return res.status(400).json({ ok: false, message: 'nombre y p_apellido son obligatorios.' });
-  }
-  if (!usuario.fecha_nac) {
-    return res.status(400).json({ ok: false, message: 'fecha_nac es obligatorio (YYYY-MM-DD).' });
+  // Si viene un usuario ya existente (cuenta logueada), no se piden nombre/fecha_nac de nuevo.
+  if (!id_usuario_existente) {
+    if (!usuario || !usuario.nombre || !usuario.p_apellido) {
+      return res.status(400).json({ ok: false, message: 'nombre y p_apellido son obligatorios.' });
+    }
+    if (!usuario.fecha_nac) {
+      return res.status(400).json({ ok: false, message: 'fecha_nac es obligatorio (YYYY-MM-DD).' });
+    }
   }
 
   const t = await sequelize.transaction();
 
   try {
-    // 1. Resolver catálogos
-    let id_genero  = parseInt(usuario.id_genero)   || null;
+    let idUsuario;
     let id_carrera = parseInt(academico.id_carrera) || null;
-    if (!id_genero)  id_genero  = await resolverGenero(usuario.genero, t);
     if (!id_carrera) id_carrera = await resolverCarrera(academico.carrera, t);
-
-    console.log('[SEMK] id_genero:', id_genero, '| id_carrera:', id_carrera);
 
     if (!id_carrera) {
       await t.rollback();
       return res.status(400).json({ ok: false, message: 'Carrera no encontrada en la BD.' });
     }
-    if (!id_genero) {
-      await t.rollback();
-      return res.status(400).json({ ok: false, message: 'Genero no encontrado en la BD.' });
+
+    if (id_usuario_existente) {
+      // 2. Reutilizar el usuario ya existente (cuenta logueada) — no se crea uno nuevo
+      const usuarioExistente = await Usuario.findByPk(parseInt(id_usuario_existente), { transaction: t });
+      if (!usuarioExistente) {
+        await t.rollback();
+        return res.status(400).json({ ok: false, message: 'La cuenta indicada no existe.' });
+      }
+      idUsuario = usuarioExistente.id;
+      console.log('[SEMK] Reutilizando usuario existente. idUsuario:', idUsuario);
+    } else {
+      // 1. Resolver catálogos
+      let id_genero = parseInt(usuario.id_genero) || null;
+      if (!id_genero) id_genero = await resolverGenero(usuario.genero, t);
+
+      console.log('[SEMK] id_genero:', id_genero, '| id_carrera:', id_carrera);
+
+      if (!id_genero) {
+        await t.rollback();
+        return res.status(400).json({ ok: false, message: 'Genero no encontrado en la BD.' });
+      }
+
+      // 2. Usuario
+      const nuevoUsuario = await Usuario.create({
+        p_apellido: usuario.p_apellido,
+        s_apellido: usuario.s_apellido || null,
+        nombre:     usuario.nombre,
+        fecha_nac:  usuario.fecha_nac,
+        id_genero,
+      }, { transaction: t });
+
+      idUsuario = nuevoUsuario.id;
     }
-
-    // 2. Usuario
-    const nuevoUsuario = await Usuario.create({
-      p_apellido: usuario.p_apellido,
-      s_apellido: usuario.s_apellido || null,
-      nombre:     usuario.nombre,
-      fecha_nac:  usuario.fecha_nac,
-      id_genero,
-    }, { transaction: t });
-
-    const idUsuario = nuevoUsuario.id;
 
     // 3. Datos académicos
     await DatosAcademicos.create({

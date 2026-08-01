@@ -262,6 +262,9 @@ async function enviarResultados() {
     : /iPad|Tablet/i.test(ua) ? 'tablet' : 'escritorio';
  
   const payload = {
+    // Si ya hay una cuenta con sesión activa, se reutiliza el usuario existente
+    // en vez de crear uno nuevo en cada aplicación del test.
+    id_usuario_existente: usuario.id_usuario_existente || undefined,
     // Coincide con la tabla `usuarios` de basededatos2.sql
     usuario: {
       nombre:     usuario.nombre || '',
@@ -330,11 +333,11 @@ function nbackCountdown(callback) {
   const detail = nbackDetail();
   const estEl  = nbackGet('.est');
   if (!estEl) { callback(); return; }
-
+ 
   estEl.textContent = '';
   estEl.classList.remove('est--ready', 'est--countdown', 'est--warning', 'est--danger', 'est--success', 'est--sart', 'est--stroop', 'est--nback');
   estEl.classList.add('est--ready', 'est--nback');
-
+ 
   let btn = detail.querySelector('.btn-iniciar-test');
   if (!btn) {
     btn = document.createElement('button');
@@ -343,14 +346,14 @@ function nbackCountdown(callback) {
     estEl.after(btn);
   }
   btn.classList.remove('is-hidden');
-
+ 
   btn.onclick = () => {
     btn.classList.add('is-hidden');
     let count = 3;
     estEl.textContent = count;
     estEl.classList.remove('est--ready', 'est--warning', 'est--danger', 'est--success');
     estEl.classList.add('est--countdown', 'est--nback');
-
+ 
     const iv = setInterval(() => {
       count--;
       if (count > 0) {
