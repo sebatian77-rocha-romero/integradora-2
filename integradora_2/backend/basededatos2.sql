@@ -208,6 +208,23 @@ CREATE TABLE preguntas_reactivos (
     REFERENCES pruebas(id) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================================
+--  TABLA de cuentas sesiones de usuario (para control de sesiones activas)
+-- ============================================================
+
+CREATE TABLE cuentas (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  id_usuario    INT UNSIGNED NOT NULL,
+  email         VARCHAR(150) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_cuentas_email (email),
+  UNIQUE KEY uq_cuentas_usuario (id_usuario),
+  CONSTRAINT fk_cuentas_usuario FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+ 
+
 
 -- ============================================================
 --  PASO 6: ÍNDICES
@@ -225,3 +242,4 @@ CREATE INDEX idx_sd_sesion_ord ON stroop_detalle        (id_sesion, orden);
 CREATE INDEX idx_rsa_sesion    ON resultados_sart       (id_sesion);
 CREATE INDEX idx_rnb_sesion    ON resultados_nback      (id_sesion);
 CREATE INDEX idx_pr_prueba     ON preguntas_reactivos   (id_prueba);
+CREATE INDEX idx_cuentas_usuario ON cuentas (id_usuario);
