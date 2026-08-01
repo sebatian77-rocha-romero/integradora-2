@@ -175,6 +175,8 @@ router.get('/me', async (req, res) => {
       nombre: usuario.nombre,
       p_apellido: usuario.p_apellido,
       s_apellido: usuario.s_apellido,
+      fecha_nac: usuario.fecha_nac,
+      id_genero: usuario.id_genero,
       ultima_sesion_id: ultimaSesion ? ultimaSesion.id : null,
     });
   } catch (err) {
