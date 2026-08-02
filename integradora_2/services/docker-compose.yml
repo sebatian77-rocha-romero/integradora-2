@@ -1,0 +1,66 @@
+version: "3.8"
+
+# Docker Compose OPCIONAL para levantar los 4 microservicios + MySQL
+# con un solo comando: docker compose up --build
+# No es obligatorio para la materia; también puedes correr cada
+# servicio con "npm run dev" como se explica en el README.
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: estudio2
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - semk_mysql_data:/var/lib/mysql
+      - ../backend/basededatos2.sql:/docker-entrypoint-initdb.d/init.sql
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "4001:4001"
+    environment:
+      DB_HOST: mysql
+      DB_NAME: estudio2
+      DB_USER: root
+      DB_PASS: root
+      JWT_SECRET: cambia_esto_en_produccion
+    depends_on:
+      - mysql
+
+  sesion-service:
+    build: ./sesion-service
+    ports:
+      - "4002:4002"
+    environment:
+      DB_HOST: mysql
+      DB_NAME: estudio2
+      DB_USER: root
+      DB_PASS: root
+    depends_on:
+      - mysql
+
+  feedback-service:
+    build: ./feedback-service
+    ports:
+      - "4003:4003"
+    environment:
+      API_KEY: ${API_KEY}
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:4001
+      SESION_SERVICE_URL: http://sesion-service:4002
+      FEEDBACK_SERVICE_URL: http://feedback-service:4003
+    depends_on:
+      - auth-service
+      - sesion-service
+      - feedback-service
+
+volumes:
+  semk_mysql_data:

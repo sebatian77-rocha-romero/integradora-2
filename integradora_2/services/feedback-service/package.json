@@ -1,0 +1,17 @@
+{
+  "name": "semk-feedback-service",
+  "version": "1.0.0",
+  "description": "Microservicio de retroalimentacion con IA (DeepSeek) de SEMK",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0"
+  }
+}

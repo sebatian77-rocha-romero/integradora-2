@@ -1,0 +1,13 @@
+{
+  "name": "semk-services",
+  "version": "1.0.0",
+  "description": "Orquestador de desarrollo: instala y levanta los 4 microservicios de SEMK a la vez",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix api-gateway && npm install --prefix auth-service && npm install --prefix sesion-service && npm install --prefix feedback-service",
+    "dev": "concurrently -n GATEWAY,AUTH,SESION,FEEDBACK -c blue,green,magenta,yellow \"npm run dev --prefix auth-service\" \"npm run dev --prefix sesion-service\" \"npm run dev --prefix feedback-service\" \"npm run dev --prefix api-gateway\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

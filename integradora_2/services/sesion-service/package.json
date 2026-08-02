@@ -1,0 +1,19 @@
+{
+  "name": "semk-sesion-service",
+  "version": "1.0.0",
+  "description": "Microservicio de catalogos y sesiones de test (Stroop/SART/N-Back) de SEMK",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
+    "mysql2": "^3.0.0",
+    "sequelize": "^6.0.0"
+  }
+}
