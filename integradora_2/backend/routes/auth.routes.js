@@ -37,7 +37,7 @@ function setCookieSesion(res, cuenta) {
   });
 }
 
-// ── Validaciones ───────────────────────────────
+// Validaciones
 const validarRegistro = [
   body('nombre').trim().notEmpty().withMessage('El nombre es obligatorio.'),
   body('p_apellido').trim().notEmpty().withMessage('El primer apellido es obligatorio.'),
@@ -58,7 +58,7 @@ const validarLogin = [
   body('pass').notEmpty().withMessage('Ingresa tu contraseña.'),
 ];
 
-// ── POST /api/auth/registro ───────────────────
+// POST /api/auth/registro
 router.post('/registro', validarRegistro, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -105,7 +105,7 @@ router.post('/registro', validarRegistro, async (req, res) => {
   }
 });
 
-// ── POST /api/auth/login ──────────────────────
+// POST /api/auth/login
 router.post('/login', validarLogin, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -145,13 +145,13 @@ router.post('/login', validarLogin, async (req, res) => {
   }
 });
 
-// ── POST /api/auth/logout ─────────────────────
+// POST /api/auth/logout
 router.post('/logout', (req, res) => {
   res.clearCookie(COOKIE_NAME);
   res.json({ ok: true });
 });
 
-// ── GET /api/auth/me ───────────────────────────
+// GET /api/auth/me
 // Le dice al frontend si hay alguien logueado y, si tiene
 // una sesion de test previa, cual es (para no repetir el test).
 router.get('/me', async (req, res) => {
