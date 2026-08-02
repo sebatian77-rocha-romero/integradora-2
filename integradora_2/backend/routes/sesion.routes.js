@@ -1,6 +1,10 @@
+//// version antigua que era de la estructura monolitica
+
+
 const express = require('express');
 const router  = express.Router();
 const { Op }  = require('sequelize');
+
 
 const {
   sequelize,

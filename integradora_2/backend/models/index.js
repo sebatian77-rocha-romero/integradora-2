@@ -1,3 +1,6 @@
+//// version antigua que era de la estructura monolitica
+
+
 // ─────────────────────────────────────────────
 //  models/index.js
 //  Conexión y modelos Sequelize para SEMK.

@@ -1,6 +1,8 @@
-//  server.js
+//// version antigua que era de la estructura monolitica
+
 //  servidor principal de SEMK
 //  node.js + express + sequelize + mysql
+
 
 require('dotenv').config();
 const express      = require('express');

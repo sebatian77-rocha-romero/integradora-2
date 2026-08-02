@@ -1,11 +1,5 @@
-// ─────────────────────────────────────────────
-//  auth.routes.js
-//  Registro / inicio de sesión con email+password.
-//  Usa cookies httpOnly con JWT para mantener la sesión,
-//  y liga la cuenta con la fila existente en `usuarios`
-//  (misma tabla que usan los tests, para que un usuario
-//  logueado no cree un registro duplicado cada vez).
-// ─────────────────────────────────────────────
+//// version antigua que era de la estructura monolitica
+
 
 const express  = require('express');
 const router   = express.Router();

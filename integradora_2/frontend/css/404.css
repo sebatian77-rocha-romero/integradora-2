@@ -29,7 +29,7 @@ body {
   font-family: 'VT323', monospace;
   font-size: clamp(60px, 12vw, 110px);
   font-weight: 900;
-  color: #F8FAFC;
+  color: #f8fafce3;
   letter-spacing: 8px;
   position: relative;
   display: inline-block;
@@ -123,4 +123,8 @@ body {
 @keyframes scanBtn {
   0%   { top: 0%;   opacity: 1; }
   100% { top: 100%; opacity: 0.1; }
+}
+
+.btn-404:focus {
+  outline: none;
 }

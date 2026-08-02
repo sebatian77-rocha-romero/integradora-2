@@ -1,3 +1,5 @@
+//// version antigua que era de la estructura monolitica
+
 const mysql = require("mysql2")
 
 const db = mysql.createConnection({
@@ -15,5 +17,6 @@ db.connect((err) => {
     }
     console.log("conexion exitosa a la base de datos")
 });
+
 
 module.exports = db;
