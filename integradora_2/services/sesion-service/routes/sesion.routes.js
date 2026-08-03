@@ -18,6 +18,8 @@ const {
   ComportamientoSesion,
 } = require('../models');
 
+const { evaluarSesion } = require('../utils/evaluacion');
+
 // ── Resolver género ───────────────────────────
 async function resolverGenero(valor, t) {
   if (!valor) { const f = await Genero.findOne({ transaction: t }); return f?.id || 1; }
@@ -260,7 +262,8 @@ router.get('/:id', async (req, res) => {
       ResultadoSart.findOne(  { where: { id_sesion: id }, raw: true }),
       ResultadoNback.findOne( { where: { id_sesion: id }, raw: true }),
     ]);
-    return res.json({ ok: true, data: { usuario: sesion.Usuario || sesion, sesion, stroop, sart, nback } });
+    const evaluacion = evaluarSesion({ stroop, sart, nback });
+    return res.json({ ok: true, data: { usuario: sesion.Usuario || sesion, sesion, stroop, sart, nback, evaluacion } });
   } catch (err) {
     return res.status(500).json({ ok: false, message: err.message });
   }
