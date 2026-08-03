@@ -90,6 +90,24 @@ function setBadge(id, label, cls) {
 }
 
 // ── Stroop ────────────────────────────────────
+// Clasifica el desempeño Stroop combinando el efecto (interferencia)
+// Y la tasa de error. Un efecto bajo o negativo con muchos errores
+// NO es "óptimo": indica respuestas poco confiables (adivinar, apurarse),
+// no buen control inhibitorio.
+function clasificarStroop(ef, tasaError) {
+  // Tasa de error alta invalida el resultado, sin importar el efecto
+  if (tasaError > 25) return 'BAJO';
+  if (tasaError > 15) return ef < 150 ? 'MODERADO' : 'BAJO';
+
+  // Efecto negativo o anómalamente bajo (< 0) con error moderado
+  // tampoco se considera óptimo: es un patrón atípico, no ideal.
+  if (ef < 0) return 'MODERADO';
+
+  if (ef < 150) return 'ÓPTIMO';
+  if (ef < 200) return 'MODERADO';
+  return 'BAJO';
+}
+
 function renderStroop() {
   if (!stroop.rt_congruente_ms) return;
 
@@ -99,15 +117,16 @@ function renderStroop() {
   const ef    = stroop.efecto_stroop_ms;
   const efEl  = document.getElementById('st-ef');
   efEl.textContent = ef + ' ms';
-  efEl.className   = 'mv ' + (ef < 150 ? 'g' : ef < 200 ? 'y' : 'r');
+  efEl.className   = 'mv ' + (ef >= 0 && ef < 150 ? 'g' : ef < 200 ? 'y' : 'r');
 
   const errEl = document.getElementById('st-err');
   errEl.textContent = stroop.tasa_error_pct + '%';
   errEl.className   = 'mv ' + (stroop.tasa_error_pct < 15 ? 'g' : stroop.tasa_error_pct < 25 ? 'y' : 'r');
 
+  const clasif = clasificarStroop(ef, stroop.tasa_error_pct);
   setBadge('badge-stroop',
-    ef < 150 ? 'ÓPTIMO' : ef < 200 ? 'MODERADO' : 'BAJO',
-    ef < 150 ? 'good'   : ef < 200 ? 'warn'     : 'bad');
+    clasif,
+    clasif === 'ÓPTIMO' ? 'good' : clasif === 'MODERADO' ? 'warn' : 'bad');
 }
 
 // ── SART ──────────────────────────────────────
@@ -157,8 +176,10 @@ function renderNback() {
 // ── Score global ──────────────────────────────
 function renderScore() {
   let score = 0;
-  if (stroop.efecto_stroop_ms !== undefined)
-    score += stroop.efecto_stroop_ms < 150 ? 33 : stroop.efecto_stroop_ms < 200 ? 22 : 11;
+  if (stroop.efecto_stroop_ms !== undefined) {
+    const clasif = clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct);
+    score += clasif === 'ÓPTIMO' ? 33 : clasif === 'MODERADO' ? 22 : 11;
+  }
   if (sart.errores_comision !== undefined) {
     const t = sart.errores_comision + sart.errores_omision;
     score += t <= 2 ? 33 : t <= 5 ? 22 : 11;
@@ -199,10 +220,14 @@ function renderInterpretaciones() {
   // Stroop
   if (stroop.efecto_stroop_ms !== undefined) {
     const ef = stroop.efecto_stroop_ms;
+    const err = stroop.tasa_error_pct;
+    const clasif = clasificarStroop(ef, err);
     document.getElementById('int-stroop').textContent =
-      ef < 150 ? 'Excelente control inhibitorio. Ignoras distractores con facilidad.'
-    : ef < 200 ? 'Interferencia moderada (' + ef + ' ms). Algo de dificultad para ignorar información irrelevante.'
-    :            'Interferencia alta (' + ef + ' ms). El cerebro tarda considerablemente más ante estímulos conflictivos.';
+      err > 25 ? 'Tasa de error alta (' + err + '%). Los resultados de RT no son confiables como medida de control inhibitorio; probablemente hubo respuestas apresuradas o al azar.'
+    : ef < 0  ? 'Patrón atípico: respondiste más rápido en los ensayos incongruentes que en los congruentes (efecto ' + ef + ' ms). Esto no indica buen control inhibitorio, sino un resultado inusual que conviene repetir.'
+    : clasif === 'ÓPTIMO'   ? 'Excelente control inhibitorio. Ignoras distractores con facilidad.'
+    : clasif === 'MODERADO' ? 'Interferencia moderada (' + ef + ' ms). Algo de dificultad para ignorar información irrelevante.'
+    :                          'Interferencia alta (' + ef + ' ms). El cerebro tarda considerablemente más ante estímulos conflictivos.';
   }
 
   // SART
@@ -227,8 +252,9 @@ function renderInterpretaciones() {
   }
 
   // Dimensión más afectada (se guarda en variable global para reusarla en la IA)
+  const stroopClasif = clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct);
   const peorMap = {
-    'Atención selectiva (Stroop)': stroop.efecto_stroop_ms > 200 ? 0 : stroop.efecto_stroop_ms > 150 ? 1 : 2,
+    'Atención selectiva (Stroop)': stroopClasif === 'BAJO' ? 0 : stroopClasif === 'MODERADO' ? 1 : 2,
     'Atención sostenida (SART)':   (sart.errores_comision + sart.errores_omision) > 5 ? 0 : (sart.errores_comision + sart.errores_omision) > 2 ? 1 : 2,
     'Memoria de trabajo (N-Back)': nback.pct_aciertos < 60 ? 0 : nback.pct_aciertos < 75 ? 1 : 2,
   };
