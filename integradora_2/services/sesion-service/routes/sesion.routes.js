@@ -18,7 +18,7 @@ const {
   ComportamientoSesion,
 } = require('../models');
 
-const { evaluarSesion } = require('../utils/evaluacion');
+const { evaluarSesion } = require('../utils/service_evaluacion');
 
 // ── Resolver género ───────────────────────────
 async function resolverGenero(valor, t) {
