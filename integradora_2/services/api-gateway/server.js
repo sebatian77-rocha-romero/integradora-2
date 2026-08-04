@@ -11,33 +11,10 @@ require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
-const helmet    = require('helmet');                              // lo que me paso emilio
-const sanitizer = require('perfect-express-sanitizer');           // lo que me paso emilio
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-
-// endurecimiento básico --> lo que me paso emilio
-app.disable('x-powered-by');                                      
-// CSP desactivada explícitamente: el default de helmet bloquea    
-// Google Fonts (fonts.googleapis.com / fonts.gstatic.com) que     
-// usa el frontend. Los demás headers de helmet (X-Frame-Options,  
-// X-Content-Type-Options, etc.) sí quedan activos.                
-app.use(helmet({ contentSecurityPolicy: false }));                 
-
-// Límite de tamaño de payload (evita requests gigantes)           
-const limitarPayload = (req, res, next) => {                       
-  const MAX_BYTES = 1 * 1024 * 1024; // 1MB                        
-  if (req.headers['content-length'] && parseInt(req.headers['content-length']) > MAX_BYTES) {  
-    return res.status(413).json({ ok: false, message: 'Payload demasiado grande.' });          
-  }                                                                 
-  next();                                                           
-};                                                                   
-app.use(limitarPayload);                                            
-
-// Sanitiza inputs contra XSS / inyección SQL antes de reenviarlos  // lo que me paso emilio
-app.use(sanitizer.clean({ xss: true, noSql: false, sql: true, sqlLevel: 5 })); // lo que me paso emilio
 
 const AUTH_SERVICE_URL     = process.env.AUTH_SERVICE_URL     || 'http://localhost:4001';
 const SESION_SERVICE_URL   = process.env.SESION_SERVICE_URL   || 'http://localhost:4002';
@@ -81,17 +58,16 @@ app.use('/api/sesion', createProxyMiddleware({
   pathRewrite: { '^/api/sesion': '' },
 }));
 
-// healthcheck del gateway (Railway)
+// ── Healthcheck del gateway (Railway) ─────────
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, service: 'api-gateway', timestamp: new Date().toISOString() });
 });
 
-// frontend estático
+// ── Frontend estático (sin cambios) ───────────
 app.use(express.static(path.join(__dirname, '../../frontend')));
 
-//cualquier archivo que no coincida con el archivo estatico ni con las rutas de arriba es un 404 real
-app.get((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, '../../frontend/404.html'));
+app.get('/{*path}', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/index.html'));
 });
 
 app.listen(PORT, () => {
