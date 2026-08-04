@@ -169,6 +169,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!p_apellido) { alert('Por favor ingresa tu primer apellido.');                 return; }
       if (!s_apellido) { alert('Por favor ingresa tu segundo apellido.');                return; }
       if (!fechaNac)   { alert('Por favor ingresa tu fecha de nacimiento.');             return; }
+
+      // Rechaza fechas absurdas que el input type="date" a veces deja pasar
+      // (ej. años con dígitos de más por scroll accidental del mouse).
+      const anioNac = parseInt(fechaNac.split('-')[0], 10);
+      const anioActual = new Date().getFullYear();
+      if (isNaN(anioNac) || anioNac < 1930 || anioNac > anioActual) {
+        alert('La fecha de nacimiento no es válida. Verifica el año ingresado.');
+        return;
+      }
       if (!id_genero)  { alert('Por favor selecciona tu género.');                       return; }
  
       datosUsuario = {
