@@ -1,8 +1,8 @@
 version: "3.8"
 
-# Docker Compose OPCIONAL para levantar los 4 microservicios + MySQL
+# docker Compose OPCIONAL para levantar los 4 microservicios + MySQL en local con un solo comando
 # con un solo comando: docker compose up --build
-# No es obligatorio para la materia; también puedes correr cada
+# No es obligatorio; también puedes correr cada
 # servicio con "npm run dev" como se explica en el README.
 
 services:
