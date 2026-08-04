@@ -12,7 +12,6 @@ const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
 const helmet    = require('helmet');                              // lo que me paso emilio
-const sanitizer = require('perfect-express-sanitizer');           // lo que me paso emilio
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app  = express();
@@ -36,8 +35,6 @@ const limitarPayload = (req, res, next) => {
 };                                                                   
 app.use(limitarPayload);                                            
 
-// Sanitiza inputs contra XSS / inyección SQL antes de reenviarlos  // lo que me paso emilio
-app.use(sanitizer.clean({ xss: true, noSql: false, sql: true, sqlLevel: 5 })); // lo que me paso emilio
 
 const AUTH_SERVICE_URL     = process.env.AUTH_SERVICE_URL     || 'http://localhost:4001';
 const SESION_SERVICE_URL   = process.env.SESION_SERVICE_URL   || 'http://localhost:4002';
