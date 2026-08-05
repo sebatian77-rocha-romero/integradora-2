@@ -15,12 +15,16 @@
 // Una tasa de error alta invalida el resultado sin importar el efecto,
 // y un efecto negativo (RT incongruente < RT congruente) es un patrón
 // atípico, no un signo de buen control inhibitorio.
-function clasificarStroop(ef, tasaError) {
+function clasificarStroop(ef, tasaError, acCong, acIncong) {
   if (ef === undefined || ef === null || tasaError === undefined || tasaError === null) return null;
 
   if (tasaError > 25) return 'BAJO';
   if (tasaError > 15) return ef < 150 ? 'MODERADO' : 'BAJO';
   if (ef < 0)          return 'MODERADO';
+
+  const datosInsuficientes = !acCong || !acIncong;
+  if (datosInsuficientes)  return ef < 200 ? 'MODERADO' : 'BAJO';
+
   if (ef < 150)         return 'ÓPTIMO';
   if (ef < 200)         return 'MODERADO';
   return 'BAJO';
@@ -72,7 +76,7 @@ function dimensionMasAfectada({ stroopClasif, sartClasif, nbackClasif }) {
 // ── Punto de entrada: recibe los 3 resultados crudos ──
 // y devuelve el objeto `evaluacion` completo.
 function evaluarSesion({ stroop, sart, nback }) {
-  const stroopClasif = stroop ? clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct) : null;
+  const stroopClasif = stroop ? clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct, stroop.aciertos_congruente, stroop.aciertos_incongruente) : null;
   const sartClasif   = sart   ? clasificarSart(sart.errores_comision, sart.errores_omision)       : null;
   const nbackClasif  = nback  ? clasificarNback(nback.pct_aciertos)                                : null;
 
