@@ -1,12 +1,9 @@
-// ─────────────────────────────────────────────
-//  nback.js
 //  Lógica completa del Test N-Back.
 //  Fase 1: 10 ítems de práctica (1-back)
 //  Fase 2: 20 ítems reales     (2-back)
 //  Se inicializa llamando a initNback().
 //  Al terminar guarda resultados y llama a
 //  enviarResultados() para subir todo al backend.
-// ─────────────────────────────────────────────
 
 const NBACK_LETTERS   = ['A','B','C','D','F','G','H','J','K','L'];
 const NBACK_PRACTICA  = 10;
@@ -107,14 +104,6 @@ function nbackFeedback(msg, color) {
   estEl.textContent    = msg;
 }
  
-function nbackUpdateHist(currentLetter, isMatch) {
-  // historial oculto
-  const detail = nbackDetail();
-  if (!detail) return;
-  const histEl = detail.querySelector('.nback-hist');
-  if (histEl) histEl.style.display = 'none';
-}
- 
 // ── Mostrar estímulo ──────────────────────────
 function nbackNext() {
   const totalFase = nback.fase === 'practica' ? NBACK_PRACTICA : NBACK_REAL;
@@ -148,7 +137,6 @@ function nbackNext() {
  
   nbackShowLetter(nback.currentItem.letter);
   nbackUpdateProgress();
-  nbackUpdateHist(nback.currentItem.letter, false);
  
   // Marcar tiempo tras repintado
   requestAnimationFrame(() => {
@@ -192,7 +180,6 @@ function nbackCoincidir() {
   if (esMatch) {
     if (nback.fase === 'real') { nback.aciertos++; nback.rts.push(rt); }
     nbackFeedback('✓ CORRECTO — ' + rt + ' ms', '#00e676');
-    nbackUpdateHist(nback.currentItem.letter, true);
   } else {
     if (nback.fase === 'real') nback.errores++;
     nbackFeedback('✗ FALSO POSITIVO', '#ff4444');
@@ -212,8 +199,12 @@ function nbackEnd() {
   clearInterval(nback.timerInterval);
   clearTimeout(nback.stimTimeout);
  
-  const totalTargets = nback.seq.filter(i => i.isMatch).length;
-  const totalLures   = nback.seq.length - totalTargets;
+  // Igual que en sart.js: si el test terminó antes de agotar toda la secuencia
+  // (p. ej. se acabó el tiempo), solo contamos lo que el usuario realmente vio.
+  const completed       = Math.min(nback.idx, nback.seq.length);
+  const seqCompletada   = nback.seq.slice(0, completed);
+  const totalTargets    = seqCompletada.filter(i => i.isMatch).length;
+  const totalNoObjetivo = seqCompletada.length - totalTargets;
  
   const avgRt = nback.rts.length
     ? Math.round(nback.rts.reduce((a, b) => a + b, 0) / nback.rts.length) : 0;
@@ -229,16 +220,16 @@ function nbackEnd() {
     ? parseFloat(((nback.aciertos / totalTargets) * 100).toFixed(1)) : 0;
  
   const resultadoNback = {
-    nivel_n:          2,
-    pct_aciertos:     pctAciertos,
-    aciertos:         nback.aciertos,
-    errores_omision:  nback.omisiones,
-    errores_comision: nback.errores,
-    total_targets:    totalTargets,
-    total_lures:      totalLures,
-    rt_promedio_ms:   avgRt,
-    rt_desviacion_ms: rtDev,
-    duracion_total_ms:(NBACK_DURATION - nback.secsLeft) * 1000,
+    nivel_n:            nback.n, // refleja la fase realmente alcanzada, no un valor fijo
+    pct_aciertos:       pctAciertos,
+    aciertos:           nback.aciertos,
+    errores_omision:    nback.omisiones,
+    errores_comision:   nback.errores,
+    total_targets:      totalTargets,
+    total_no_objetivo:  totalNoObjetivo, // antes "total_lures": no eran lures reales
+    rt_promedio_ms:     avgRt,
+    rt_desviacion_ms:   rtDev,
+    duracion_total_ms: (NBACK_DURATION - nback.secsLeft) * 1000,
   };
   sessionStorage.setItem('semk_nback', JSON.stringify(resultadoNback));
  
