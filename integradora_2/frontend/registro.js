@@ -1,5 +1,3 @@
-// ─────────────────────────────────────────────
-//  registro.js
 //  Envía el formulario de creación de cuenta a
 //  POST /api/auth/registro. Reutiliza el mismo
 //  catálogo de géneros que usa el test (formulario.js).
@@ -10,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btn           = document.getElementById('btn-registro');
   const errorBox       = document.getElementById('auth-error');
 
-  // ── Cargar géneros desde la BD (mismo endpoint que el test) ──
+  // ── Cargar géneros desde la bd
   try {
     const res  = await fetch('/api/sesion/generos');
     const json = await res.json();

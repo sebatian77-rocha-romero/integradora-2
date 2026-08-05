@@ -219,7 +219,7 @@ router.post('/completa', async (req, res) => {
       errores_omision:   nback.errores_omision  || 0,
       errores_comision:  nback.errores_comision || 0,
       total_targets:     nback.total_targets    || 0,
-      total_lures:       nback.total_lures      || 0,
+      total_lures:       nback.total_lures ?? nback.total_no_objetivo ?? 0,
       rt_promedio_ms:    nback.rt_promedio_ms   || 0,
       rt_desviacion_ms:  nback.rt_desviacion_ms || 0,
       duracion_total_ms: nback.duracion_total_ms|| 0,
