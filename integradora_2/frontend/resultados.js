@@ -94,7 +94,7 @@ function setBadge(id, label, cls) {
 // Y la tasa de error. Un efecto bajo o negativo con muchos errores
 // NO es "óptimo": indica respuestas poco confiables (adivinar, apurarse),
 // no buen control inhibitorio.
-function clasificarStroop(ef, tasaError) {
+function clasificarStroop(ef, tasaError, acCong, acIncong) {
   // Tasa de error alta invalida el resultado, sin importar el efecto
   if (tasaError > 25) return 'BAJO';
   if (tasaError > 15) return ef < 150 ? 'MODERADO' : 'BAJO';
@@ -102,6 +102,11 @@ function clasificarStroop(ef, tasaError) {
   // Efecto negativo o anómalamente bajo (< 0) con error moderado
   // tampoco se considera óptimo: es un patrón atípico, no ideal.
   if (ef < 0) return 'MODERADO';
+
+  // Sin aciertos en alguna categoría, el promedio de esa categoría es
+  // "0ms" fabricado (sin datos reales) — el efecto no es confiable.
+  const datosInsuficientes = !acCong || !acIncong;
+  if (datosInsuficientes) return ef < 200 ? 'MODERADO' : 'BAJO';
 
   if (ef < 150) return 'ÓPTIMO';
   if (ef < 200) return 'MODERADO';
@@ -123,7 +128,7 @@ function renderStroop() {
   errEl.textContent = stroop.tasa_error_pct + '%';
   errEl.className   = 'mv ' + (stroop.tasa_error_pct < 15 ? 'g' : stroop.tasa_error_pct < 25 ? 'y' : 'r');
 
-  const clasif = clasificarStroop(ef, stroop.tasa_error_pct);
+  const clasif = clasificarStroop(ef, stroop.tasa_error_pct, stroop.aciertos_congruente, stroop.aciertos_incongruente);
   setBadge('badge-stroop',
     clasif,
     clasif === 'ÓPTIMO' ? 'good' : clasif === 'MODERADO' ? 'warn' : 'bad');
@@ -177,7 +182,7 @@ function renderNback() {
 function renderScore() {
   let score = 0;
   if (stroop.efecto_stroop_ms !== undefined) {
-    const clasif = clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct);
+    const clasif = clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct, stroop.aciertos_congruente, stroop.aciertos_incongruente);
     score += clasif === 'ÓPTIMO' ? 33 : clasif === 'MODERADO' ? 22 : 11;
   }
   if (sart.errores_comision !== undefined) {
@@ -221,7 +226,7 @@ function renderInterpretaciones() {
   if (stroop.efecto_stroop_ms !== undefined) {
     const ef = stroop.efecto_stroop_ms;
     const err = stroop.tasa_error_pct;
-    const clasif = clasificarStroop(ef, err);
+    const clasif = clasificarStroop(ef, err, stroop.aciertos_congruente, stroop.aciertos_incongruente);
     document.getElementById('int-stroop').textContent =
       err > 25 ? 'Tasa de error alta (' + err + '%). Los resultados de RT no son confiables como medida de control inhibitorio; probablemente hubo respuestas apresuradas o al azar.'
     : ef < 0  ? 'Patrón atípico: respondiste más rápido en los ensayos incongruentes que en los congruentes (efecto ' + ef + ' ms). Esto no indica buen control inhibitorio, sino un resultado inusual que conviene repetir.'
@@ -252,7 +257,7 @@ function renderInterpretaciones() {
   }
 
   // Dimensión más afectada (se guarda en variable global para reusarla en la IA)
-  const stroopClasif = clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct);
+  const stroopClasif = clasificarStroop(stroop.efecto_stroop_ms, stroop.tasa_error_pct, stroop.aciertos_congruente, stroop.aciertos_incongruente);
   const peorMap = {
     'Atención selectiva (Stroop)': stroopClasif === 'BAJO' ? 0 : stroopClasif === 'MODERADO' ? 1 : 2,
     'Atención sostenida (SART)':   (sart.errores_comision + sart.errores_omision) > 5 ? 0 : (sart.errores_comision + sart.errores_omision) > 2 ? 1 : 2,
