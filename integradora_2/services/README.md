@@ -1,6 +1,7 @@
 # SEMK — Arquitectura de microservicios
 
-Este directorio reemplaza el backend monolítico (`backend/`) por **4 procesos
+Este directorio reemplaza el backend monolítico (`backend/`, anteriormente usando por prisa de recolectar datos para otras
+actividades) por **4 procesos
 independientes**, cada uno con su propio `server.js`, `package.json`,
 dependencias y puerto:
 
@@ -16,7 +17,7 @@ services/
 
 | Servicio | Responsabilidad única | Por qué es su propio servicio |
 |---|---|---|
-| **auth-service** | Identidad: cuentas, contraseñas, JWT/cookie | Cambia por razones distintas al resto (seguridad, políticas de password) y podría escalar/asegurarse aparte |
+| **auth-service** | Identidad: se encarga de controlar cuentas, contraseñas, JWT/cookie | Cambia por razones distintas al resto (seguridad, políticas de password) y podría escalar/asegurarse aparte |
 | **sesion-service** | El dominio central: guardar y leer resultados de los 3 tests | Es el corazón del negocio; concentra casi toda la escritura a BD |
 | **feedback-service** | Wrapper sobre una API externa (DeepSeek) | No toca la base de datos, depende de un servicio de terceros con su propia latencia/fallas — si DeepSeek se cae o tarda, no debe tumbar el resto del sistema |
 | **api-gateway** | Punto de entrada único + sirve el frontend | El frontend le sigue pegando a `/api/...` igual que siempre; el gateway decide a qué microservicio reenviar cada petición |
@@ -30,8 +31,8 @@ usando la misma base MySQL** (`estudio2`), cada uno con su propio archivo
 `models/index.js` que define **solo los modelos que le corresponden a su
 dominio** (p. ej. `sesion-service` no conoce el modelo `Cuenta`, eso es
 exclusivo de `auth-service`). Esto es una base de datos compartida, no
-"database-per-service" puro — es una decisión pragmática válida para un
-proyecto académico; si tu materia pide aislamiento total de datos, el
+"database-per-service" puro — es una decisión pragmática tomado por temas de presupuesto y restricciones de railway
+; si tu materia pide aislamiento total de datos, el
 siguiente paso sería darle a cada servicio su propia base de datos y que se
 comuniquen por API en vez de por tablas compartidas (p. ej. `sesion-service`
 le preguntaría a `auth-service` por un usuario en vez de leer la tabla
@@ -66,8 +67,7 @@ le preguntaría a `auth-service` por un usuario en vez de leer la tabla
    cd feedback-service   && npm install && npm run dev
    cd api-gateway         && npm install && npm run dev
    ```
-4. Abre `http://localhost:3000` — el frontend es exactamente el mismo, y
-   sigue llamando a `/api/auth/...` y `/api/sesion/...`; el gateway se
+4. Abre `http://localhost:3000` — sigue llamando a `/api/auth/...` y `/api/sesion/...`; el gateway se
    encarga de reenviar cada petición al microservicio correcto.
 
 ### Con Docker (opcional)
@@ -84,10 +84,3 @@ Cada carpeta (`api-gateway`, `auth-service`, `sesion-service`,
 distinto por servicio). En el gateway, configura las variables
 `AUTH_SERVICE_URL`, `SESION_SERVICE_URL` y `FEEDBACK_SERVICE_URL` apuntando
 a las URLs públicas que Railway le asigne a cada microservicio.
-
-## Qué NO cambió
-
-- El **frontend** (`frontend/`) no se tocó ni una línea: sigue llamando a
-  las mismas rutas de siempre.
-- La lógica de negocio dentro de cada ruta es idéntica a la del monolito
-  original — solo se reorganizó en procesos separados.

@@ -1,22 +1,25 @@
-// ─────────────────────────────────────────────
-//  feedback-service/server.js
 //  Microservicio de retroalimentación con IA (DeepSeek).
-//  Es el ejemplo mas "puro" de microservicio: no toca
-//  la base de datos, es un simple wrapper sobre una API
+//  no toca la base de datos, es un simple wrapper sobre una API
 //  externa. Se beneficia de escalar/cachear/tolerar fallos
 //  de forma independiente al resto del sistema.
-// ─────────────────────────────────────────────
 
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
-
+ 
+const verificarInterno = require('./middleware/verificarInterno');
+ 
 const app  = express();
 const PORT = process.env.PORT || 4003;
-
+ 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
-
+ 
+// Solo el api-gateway puede llegar más allá de /health.
+// Esto evita que cualquiera llame directo a la URL pública de
+// Railway de este servicio y queme la API key de DeepSeek.
+app.use(verificarInterno);
+ 
 app.post('/retroalimentacion', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ ok: false, message: 'Falta el prompt.' });
@@ -44,11 +47,11 @@ app.post('/retroalimentacion', async (req, res) => {
     res.status(500).json({ ok: false, message: err.message });
   }
 });
-
+ 
 app.get('/health', (req, res) => {
   res.json({ ok: true, service: 'feedback-service', timestamp: new Date().toISOString() });
 });
-
+ 
 app.listen(PORT, () => {
   console.log(`[feedback-service] corriendo en http://localhost:${PORT}`);
 });

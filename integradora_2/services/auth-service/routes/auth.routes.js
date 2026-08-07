@@ -1,8 +1,12 @@
 // ─────────────────────────────────────────────
 //  auth.routes.js  (auth-service)
-//  Registro / inicio de sesión con email+password.
-//  Sin cambios de lógica respecto al monolito original,
-//  solo vive ahora dentro de su propio microservicio.
+//  registro / inicio de sesion con email+password.
+//
+//  IMPORTANTE (autonomia de datos): este servicio ya NO toca
+//  las tablas usuarios/sesiones/generos directo. Esas son
+//  dominio de sesion-service. Cuando este servicio necesita
+//  crear o leer esa informacion, se la pide por HTTP via
+//  utils/sesionClient.js — nunca importa sus modelos.
 // ─────────────────────────────────────────────
 
 const express  = require('express');
@@ -11,7 +15,8 @@ const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 
-const { sequelize, Usuario, Cuenta, Genero, Sesion } = require('../models');
+const { sequelize, Cuenta } = require('../models');
+const sesionClient = require('../utils/sesionClient');
 
 const JWT_SECRET    = process.env.JWT_SECRET || 'cambia_esto_en_produccion';
 const COOKIE_NAME    = 'semk_token';
@@ -39,21 +44,21 @@ function setCookieSesion(res, cuenta) {
 const validarRegistro = [
   body('nombre').trim().notEmpty().withMessage('El nombre es obligatorio.'),
   body('p_apellido').trim().notEmpty().withMessage('El primer apellido es obligatorio.'),
-  body('fecha_nac').isISO8601().withMessage('Fecha de nacimiento inválida (YYYY-MM-DD).'),
-  body('id_genero').isInt().withMessage('Selecciona un género.'),
-  body('email').isEmail().normalizeEmail().withMessage('Ingresa un correo electrónico válido.'),
-  body('pass').isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.')
-    .matches(/[0-9]/).withMessage('La contraseña debe incluir al menos un número.')
-    .matches(/[A-Z]/).withMessage('La contraseña debe incluir al menos una mayúscula.'),
+  body('fecha_nac').isISO8601().withMessage('Fecha de nacimiento invalida (YYYY-MM-DD).'),
+  body('id_genero').isInt().withMessage('Selecciona un genero.'),
+  body('email').isEmail().normalizeEmail().withMessage('Ingresa un correo electronico valido.'),
+  body('pass').isLength({ min: 8 }).withMessage('La contrasena debe tener al menos 8 caracteres.')
+    .matches(/[0-9]/).withMessage('La contrasena debe incluir al menos un numero.')
+    .matches(/[A-Z]/).withMessage('La contrasena debe incluir al menos una mayuscula.'),
   body('c_pass').custom((value, { req }) => {
-    if (value !== req.body.pass) throw new Error('Las contraseñas no coinciden.');
+    if (value !== req.body.pass) throw new Error('Las contrasenas no coinciden.');
     return true;
   }),
 ];
 
 const validarLogin = [
-  body('email').isEmail().normalizeEmail().withMessage('Ingresa un correo electrónico válido.'),
-  body('pass').notEmpty().withMessage('Ingresa tu contraseña.'),
+  body('email').isEmail().normalizeEmail().withMessage('Ingresa un correo electronico valido.'),
+  body('pass').notEmpty().withMessage('Ingresa tu contrasena.'),
 ];
 
 // ── POST /registro ────────────────────────────
@@ -65,39 +70,58 @@ router.post('/registro', validarRegistro, async (req, res) => {
 
   const { nombre, p_apellido, s_apellido, fecha_nac, id_genero, email, pass } = req.body;
 
-  const t = await sequelize.transaction();
   try {
-    const genero = await Genero.findByPk(parseInt(id_genero), { transaction: t });
-    if (!genero) {
-      await t.rollback();
-      return res.status(400).json({ ok: false, message: 'Género no válido.' });
+    // 1. Validar genero contra sesion-service (dueno real del catalogo).
+    try {
+      await sesionClient.validarGenero(parseInt(id_genero));
+    } catch (err) {
+      if (err instanceof sesionClient.SesionServiceError && err.status === 503) {
+        console.error('[auth-service] sesion-service no disponible al validar genero:', err.message);
+        return res.status(503).json({ ok: false, message: 'No se pudo validar el genero, intenta de nuevo en unos momentos.' });
+      }
+      return res.status(400).json({ ok: false, message: 'Genero no valido.' });
     }
 
-    const yaExiste = await Cuenta.findOne({ where: { email }, transaction: t });
+    // 2. Verificar que el correo no este registrado (esto SI es dominio propio).
+    const yaExiste = await Cuenta.findOne({ where: { email } });
     if (yaExiste) {
-      await t.rollback();
-      return res.status(409).json({ ok: false, message: 'Ese correo ya está registrado.' });
+      return res.status(409).json({ ok: false, message: 'Ese correo ya esta registrado.' });
     }
 
-    const nuevoUsuario = await Usuario.create({
-      nombre, p_apellido, s_apellido: s_apellido || null,
-      fecha_nac, id_genero: parseInt(id_genero),
-    }, { transaction: t });
+    // 3. Crear el Usuario en sesion-service (dueno real de esa tabla).
+    let idUsuario;
+    try {
+      const resultado = await sesionClient.crearUsuario({
+        nombre, p_apellido, s_apellido: s_apellido || null, fecha_nac, id_genero: parseInt(id_genero),
+      });
+      idUsuario = resultado.data.id;
+    } catch (err) {
+      console.error('[auth-service] Error al crear usuario en sesion-service:', err.message);
+      return res.status(503).json({ ok: false, message: 'No se pudo completar el registro, intenta de nuevo.' });
+    }
 
+    // 4. Crear la Cuenta local (esto SI es dominio propio de auth-service).
     const hash = await bcrypt.hash(pass, 10);
-    const nuevaCuenta = await Cuenta.create({
-      id_usuario: nuevoUsuario.id, email, password_hash: hash,
-    }, { transaction: t });
+    let nuevaCuenta;
+    try {
+      nuevaCuenta = await Cuenta.create({ id_usuario: idUsuario, email, password_hash: hash });
+    } catch (err) {
+      // El Usuario ya se creo en sesion-service pero la Cuenta fallo aqui.
+      // Nota de diseno: esto deja un Usuario "huerfano" sin cuenta asociada.
+      // Es una limitacion conocida de este alcance (no implementamos un paso
+      // de compensacion/rollback distribuido); en un sistema mas grande esto
+      // se resolveria con una saga o un job de limpieza periodico.
+      console.error('[auth-service] Cuenta.create fallo tras crear usuario remoto. usuario_id huerfano:', idUsuario, err);
+      return res.status(500).json({ ok: false, message: 'Error interno al registrar la cuenta.' });
+    }
 
-    await t.commit();
     setCookieSesion(res, nuevaCuenta);
 
     return res.status(201).json({
-      ok: true, usuario_id: nuevoUsuario.id, email: nuevaCuenta.email,
+      ok: true, usuario_id: idUsuario, email: nuevaCuenta.email,
       message: 'Cuenta creada correctamente.',
     });
   } catch (err) {
-    await t.rollback();
     console.error('[auth-service] Error en /registro:', err);
     return res.status(500).json({ ok: false, message: 'Error interno al registrar la cuenta.' });
   }
@@ -115,30 +139,35 @@ router.post('/login', validarLogin, async (req, res) => {
   try {
     const cuenta = await Cuenta.findOne({ where: { email } });
     if (!cuenta) {
-      return res.status(401).json({ ok: false, message: 'Correo o contraseña incorrectos.' });
+      return res.status(401).json({ ok: false, message: 'Correo o contrasena incorrectos.' });
     }
 
     const coincide = await bcrypt.compare(pass, cuenta.password_hash);
     if (!coincide) {
-      return res.status(401).json({ ok: false, message: 'Correo o contraseña incorrectos.' });
+      return res.status(401).json({ ok: false, message: 'Correo o contrasena incorrectos.' });
     }
 
     setCookieSesion(res, cuenta);
 
-    const ultimaSesion = await Sesion.findOne({
-      where: { id_usuario: cuenta.id_usuario },
-      order: [['created_at', 'DESC']],
-    });
+    // Best-effort: si sesion-service no responde, el login NO debe fallar
+    // por esto — solo se pierde el dato de "ultima sesion", no es critico.
+    let ultimaSesionId = null;
+    try {
+      const resultado = await sesionClient.obtenerUltimaSesion(cuenta.id_usuario);
+      ultimaSesionId = resultado.data.sesion_id;
+    } catch (err) {
+      console.warn('[auth-service] No se pudo obtener ultima sesion (no bloquea el login):', err.message);
+    }
 
     return res.json({
       ok: true,
       usuario_id: cuenta.id_usuario,
       email: cuenta.email,
-      ultima_sesion_id: ultimaSesion ? ultimaSesion.id : null,
+      ultima_sesion_id: ultimaSesionId,
     });
   } catch (err) {
     console.error('[auth-service] Error en /login:', err);
-    return res.status(500).json({ ok: false, message: 'Error interno al iniciar sesión.' });
+    return res.status(500).json({ ok: false, message: 'Error interno al iniciar sesion.' });
   }
 });
 
@@ -153,31 +182,51 @@ router.get('/me', async (req, res) => {
   const token = req.cookies?.[COOKIE_NAME];
   if (!token) return res.json({ ok: true, logueado: false });
 
+  let payload;
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    const usuario = await Usuario.findByPk(payload.id_usuario);
-    if (!usuario) return res.json({ ok: true, logueado: false });
-
-    const ultimaSesion = await Sesion.findOne({
-      where: { id_usuario: payload.id_usuario },
-      order: [['created_at', 'DESC']],
-    });
-
-    return res.json({
-      ok: true, logueado: true,
-      usuario_id: payload.id_usuario,
-      email: payload.email,
-      nombre: usuario.nombre,
-      p_apellido: usuario.p_apellido,
-      s_apellido: usuario.s_apellido,
-      fecha_nac: usuario.fecha_nac,
-      id_genero: usuario.id_genero,
-      ultima_sesion_id: ultimaSesion ? ultimaSesion.id : null,
-    });
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
     res.clearCookie(COOKIE_NAME);
     return res.json({ ok: true, logueado: false });
   }
+
+  // Datos del usuario SI son criticos para /me (es el punto de la ruta):
+  // si sesion-service no responde, hay que decirlo explicitamente en vez
+  // de inventar una respuesta o fallar en silencio.
+  let usuario;
+  try {
+    const resultado = await sesionClient.obtenerUsuario(payload.id_usuario);
+    usuario = resultado.data;
+  } catch (err) {
+    if (err instanceof sesionClient.SesionServiceError && err.status === 503) {
+      console.error('[auth-service] sesion-service no disponible en /me:', err.message);
+      return res.status(503).json({ ok: false, message: 'No se pudo verificar tu sesion, intenta de nuevo.' });
+    }
+    // 404: el usuario ya no existe en sesion-service (dato inconsistente/borrado).
+    res.clearCookie(COOKIE_NAME);
+    return res.json({ ok: true, logueado: false });
+  }
+
+  // Best-effort: la ultima sesion de test no es critica para /me.
+  let ultimaSesionId = null;
+  try {
+    const resultadoSesion = await sesionClient.obtenerUltimaSesion(payload.id_usuario);
+    ultimaSesionId = resultadoSesion.data.sesion_id;
+  } catch (err) {
+    console.warn('[auth-service] No se pudo obtener ultima sesion en /me (no bloquea):', err.message);
+  }
+
+  return res.json({
+    ok: true, logueado: true,
+    usuario_id: payload.id_usuario,
+    email: payload.email,
+    nombre: usuario.nombre,
+    p_apellido: usuario.p_apellido,
+    s_apellido: usuario.s_apellido,
+    fecha_nac: usuario.fecha_nac,
+    id_genero: usuario.id_genero,
+    ultima_sesion_id: ultimaSesionId,
+  });
 });
 
 module.exports = router;

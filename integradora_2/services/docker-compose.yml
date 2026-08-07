@@ -16,7 +16,7 @@ services:
     volumes:
       - semk_mysql_data:/var/lib/mysql
       - ../backend/basededatos2.sql:/docker-entrypoint-initdb.d/init.sql
-
+ 
   auth-service:
     build: ./auth-service
     ports:
@@ -27,9 +27,12 @@ services:
       DB_USER: root
       DB_PASS: root
       JWT_SECRET: cambia_esto_en_produccion
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-secreto_interno_local_dev}
+      SESION_SERVICE_URL: http://sesion-service:4002
     depends_on:
       - mysql
-
+      - sesion-service
+ 
   sesion-service:
     build: ./sesion-service
     ports:
@@ -39,16 +42,18 @@ services:
       DB_NAME: estudio2
       DB_USER: root
       DB_PASS: root
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-secreto_interno_local_dev}
     depends_on:
       - mysql
-
+ 
   feedback-service:
     build: ./feedback-service
     ports:
       - "4003:4003"
     environment:
       API_KEY: ${API_KEY}
-
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-secreto_interno_local_dev}
+ 
   api-gateway:
     build: ./api-gateway
     ports:
@@ -57,10 +62,11 @@ services:
       AUTH_SERVICE_URL: http://auth-service:4001
       SESION_SERVICE_URL: http://sesion-service:4002
       FEEDBACK_SERVICE_URL: http://feedback-service:4003
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-secreto_interno_local_dev}
     depends_on:
       - auth-service
       - sesion-service
       - feedback-service
-
+ 
 volumes:
   semk_mysql_data:
