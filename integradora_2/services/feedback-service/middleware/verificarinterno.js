@@ -1,5 +1,4 @@
 // ─────────────────────────────────────────────
-//  middleware/verificarInterno.js
 //  Rechaza cualquier petición que NO venga del api-gateway.
 //  El gateway inyecta el header x-internal-key con un secreto
 //  compartido (INTERNAL_API_KEY) que solo él y los microservicios

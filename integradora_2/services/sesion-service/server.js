@@ -9,7 +9,7 @@ const express = require('express');
 const cors    = require('cors');
 const { sequelize } = require('./models');
  
-const verificarInterno = require('./middleware/verificarInterno');
+const verificarInterno = require('./middleware/verificarIntento');
  
 const app  = express();
 const PORT = process.env.PORT || 4002;
