@@ -1,4 +1,6 @@
-const SESION_SERVICE_URL = process.env.SESION_SERVICE_URL || 'http://localhost:4002';
+//se quita cualquier / sobrante, eesto es mas para railway ya que lo solicita en una variable de entorno, sin esto 
+//sin esto express reponderia con un 404 aunque exista la ruta
+const SESION_SERVICE_URL = (process.env.SESION_SERVICE_URL || 'http://localhost:4002').replace(/\/+$/, '');
 const INTERNAL_API_KEY   = process.env.INTERNAL_API_KEY;
 const TIMEOUT_MS = 3000;
  
