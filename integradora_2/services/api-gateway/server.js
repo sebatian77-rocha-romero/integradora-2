@@ -39,6 +39,18 @@ app.use(limitarPayload);
 const AUTH_SERVICE_URL     = process.env.AUTH_SERVICE_URL     || 'http://localhost:4001';
 const SESION_SERVICE_URL   = process.env.SESION_SERVICE_URL   || 'http://localhost:4002';
 const FEEDBACK_SERVICE_URL = process.env.FEEDBACK_SERVICE_URL || 'http://localhost:4003';
+const INTERNAL_API_KEY     = process.env.INTERNAL_API_KEY;
+
+if (!INTERNAL_API_KEY) {
+  console.warn('[gateway] INTERNAL_API_KEY no configurada: los microservicios rechazaran todo con 401.');
+}
+
+// Inyecta el header que verificarInterno espera en cada microservicio.
+// Sin esto, TODAS las peticiones (incluso las legitimas via gateway)
+// son rechazadas con 401 por verificarInterno.
+function inyectarClaveInterna(proxyReq) {
+  proxyReq.setHeader('x-internal-key', INTERNAL_API_KEY || '');
+}
 
 const ORIGENES_PERMITIDOS = [
   'http://localhost:8081',
@@ -64,18 +76,21 @@ app.use('/api/sesion/retroalimentacion', createProxyMiddleware({
   target: FEEDBACK_SERVICE_URL,
   changeOrigin: true,
   pathRewrite: { '^/api/sesion/retroalimentacion': '/retroalimentacion' },
+  onProxyReq: inyectarClaveInterna,
 }));
 
 app.use('/api/auth', createProxyMiddleware({
   target: AUTH_SERVICE_URL,
   changeOrigin: true,
   pathRewrite: { '^/api/auth': '' },
+  onProxyReq: inyectarClaveInterna,
 }));
 
 app.use('/api/sesion', createProxyMiddleware({
   target: SESION_SERVICE_URL,
   changeOrigin: true,
   pathRewrite: { '^/api/sesion': '' },
+  onProxyReq: inyectarClaveInterna,
 }));
 
 // healthcheck del gateway (Railway)
