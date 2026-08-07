@@ -40,7 +40,7 @@ le preguntaría a `auth-service` por un usuario en vez de leer la tabla
 
 ## Cómo correrlo en local
 
-1. Copia cada `.env.example` a `.env` dentro de su propia carpeta y ajusta
+1. Copia cada `.env.example` a `.env` dentro de su propia carpeta y ajusta(no se sube los .env por temas de segurida por eso son los.env.example para tener de ejmplo como se debe configurar las variables de entorno)
    credenciales (mismo `DB_NAME`/`DB_USER`/`DB_PASS` que ya usabas):
    ```
    cp auth-service/.env.example auth-service/.env

@@ -1,5 +1,3 @@
-// ─────────────────────────────────────────────
-//  sesion.routes.js  (sesion-service)
 //  Catálogos + guardado y consulta de sesiones de test.
 //  Nota: /retroalimentacion se movió a feedback-service,
 //  porque no necesita base de datos y llama a una API externa (IA).
@@ -20,7 +18,7 @@ const {
 
 const { evaluarSesion } = require('../utils/service_evaluacion');
 
-// ── Resolver género ───────────────────────────
+// resolver género
 async function resolverGenero(valor, t) {
   if (!valor) { const f = await Genero.findOne({ transaction: t }); return f?.id || 1; }
   if (!isNaN(valor)) { const g = await Genero.findByPk(parseInt(valor), { transaction: t }); if (g) return g.id; }
@@ -97,6 +95,35 @@ router.post('/completa', async (req, res) => {
     }
 
     if (id_usuario_existente) {
+      // Si mandan un id_usuario_existente, exigimos que el JWT del
+      // request corresponda EXACTAMENTE a ese usuario. Esto evita que
+      // alguien logueado como Usuario A mande el id de Usuario B y le
+      // "inyecte" resultados de test a una cuenta que no es la suya.
+      //
+      // Nota: esto NO afecta el flujo anónimo (personas sin cuenta que
+      // hacen el test por primera vez) — ahí simplemente no se manda
+      // id_usuario_existente y se sigue por la rama de "crear usuario
+      // nuevo" de abajo, sin pedir login.
+      if (!req.usuarioAutenticado) {
+        await t.rollback();
+        console.warn('[sesion-service] Intento de usar id_usuario_existente sin sesión válida. id_usuario_existente:', id_usuario_existente);
+        return res.status(401).json({
+          ok: false,
+          message: 'Debes iniciar sesión para continuar con una cuenta existente.',
+        });
+      }
+      if (parseInt(id_usuario_existente) !== req.usuarioAutenticado.id_usuario) {
+        await t.rollback();
+        console.warn(
+          '[sesion-service] Intento de usar id_usuario_existente ajeno. Autenticado:',
+          req.usuarioAutenticado.id_usuario, '| Solicitado:', id_usuario_existente
+        );
+        return res.status(403).json({
+          ok: false,
+          message: 'No puedes guardar resultados a nombre de otra cuenta.',
+        });
+      }
+
       const usuarioExistente = await Usuario.findByPk(parseInt(id_usuario_existente), { transaction: t });
       if (!usuarioExistente) {
         await t.rollback();

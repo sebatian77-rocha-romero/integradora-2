@@ -26,7 +26,7 @@ services:
       DB_NAME: estudio2
       DB_USER: root
       DB_PASS: root
-      JWT_SECRET: cambia_esto_en_produccion
+      JWT_SECRET: ${JWT_SECRET:-cambia_esto_en_produccion}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-secreto_interno_local_dev}
       SESION_SERVICE_URL: http://sesion-service:4002
     depends_on:
@@ -42,6 +42,7 @@ services:
       DB_NAME: estudio2
       DB_USER: root
       DB_PASS: root
+      JWT_SECRET: ${JWT_SECRET:-cambia_esto_en_produccion}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-secreto_interno_local_dev}
     depends_on:
       - mysql
