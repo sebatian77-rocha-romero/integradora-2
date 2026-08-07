@@ -36,5 +36,4 @@ function verificarInterno(req, res, next) {
 
   next();
 }
-
 module.exports = verificarInterno;
