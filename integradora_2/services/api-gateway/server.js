@@ -23,7 +23,9 @@ app.disable('x-powered-by');
 // usa el frontend. Los demás headers de helmet (X-Frame-Options,  
 // X-Content-Type-Options, etc.) sí quedan activos.                
 app.use(helmet({ contentSecurityPolicy: false }));                 
- 
+
+
+
 // Límite de tamaño de payload (evita requests gigantes)           
 const limitarPayload = (req, res, next) => {                       
   const MAX_BYTES = 1 * 1024 * 1024; // 1MB                        
@@ -51,6 +53,7 @@ function inyectarClaveInterna(proxyReq) {
   proxyReq.setHeader('x-internal-key', INTERNAL_API_KEY || '');
 }
  
+
 const ORIGENES_PERMITIDOS = [
   'http://localhost:8081',
   'http://localhost:19006',
@@ -115,12 +118,12 @@ app.get('/api/health', (req, res) => {
  
 // frontend estático
 app.use(express.static(path.join(__dirname, '../../frontend')));
- 
+
 //cualquier archivo que no coincida con el archivo estatico ni con las rutas de arriba es un 404 real
 app.get((req, res) => {
   res.status(404).sendFile(path.join(__dirname, '../../frontend/404.html'));
 });
- 
+
 app.listen(PORT, () => {
   console.log(`[api-gateway] corriendo en http://localhost:${PORT}`);
   console.log(`[api-gateway] -> auth-service:     ${AUTH_SERVICE_URL}`);

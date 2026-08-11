@@ -134,7 +134,7 @@ function renderStroop() {
     clasif === 'ÓPTIMO' ? 'good' : clasif === 'MODERADO' ? 'warn' : 'bad');
 }
 
-// ── SART ──────────────────────────────────────
+// ── SART
 function renderSart() {
   if (sart.errores_comision === undefined) return;
 
@@ -158,7 +158,7 @@ function renderSart() {
     tot <= 2 ? 'good'   : tot <= 5 ? 'warn'     : 'bad');
 }
 
-// ── N-Back ────────────────────────────────────
+// ── N-Back 
 function renderNback() {
   if (nback.pct_aciertos === undefined) return;
 
@@ -178,7 +178,7 @@ function renderNback() {
     nback.pct_aciertos >= 75 ? 'good'   : nback.pct_aciertos >= 60 ? 'warn'     : 'bad');
 }
 
-// ── Score global ──────────────────────────────
+// ── Score global 
 function renderScore() {
   let score = 0;
   if (stroop.efecto_stroop_ms !== undefined) {
@@ -198,7 +198,7 @@ function renderScore() {
   el.className = 'puntaje-valor ' + (score >= 80 ? 'good' : score >= 55 ? 'warn' : 'bad');
 }
 
-// ── Barras RT ─────────────────────────────────
+// ── Barras RT 
 function renderBarras() {
   const maxRT = Math.max(
     stroop.rt_incongruente_ms || 0,
@@ -220,7 +220,7 @@ function renderBarras() {
   setBar('bar-nb',  nback.rt_promedio_ms);
 }
 
-// ── Interpretaciones ──────────────────────────
+// ── Interpretaciones
 function renderInterpretaciones() {
   // Stroop
   if (stroop.efecto_stroop_ms !== undefined) {
@@ -339,7 +339,7 @@ function parsearRespuestaIA(texto) {
   return JSON.parse(limpio);
 }
 
-// ── Retroalimentación IA ──────────────────────
+// ── Retroalimentación IA 
 async function generarRetro() {
   const btn       = document.getElementById('ia-btn');
   const out       = document.getElementById('ia-out');
