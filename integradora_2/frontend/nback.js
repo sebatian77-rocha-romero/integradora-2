@@ -294,27 +294,39 @@ async function enviarResultados() {
       : {},
   };
  
-  try {
-    console.log('[SEMK] Payload a enviar:', JSON.stringify(payload, null, 2));  // ← aquí
-    const res  = await fetch('/api/sesion/completa', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (data.ok) {
-      nbackFeedback('✓ RESULTADOS GUARDADOS', '#00e676');
-      setTimeout(() => {
-        window.location.href = '/resultados.html?id=' + data.sesion_id;
-      }, 1500);
-    } else {
-      throw new Error(data.message || 'Error del servidor');
-    }
-  } catch (err) {
-    console.error('[SEMK] Error al enviar resultados:', err);
-    console.error('[SEMK] Mensaje:', err.message);
-    nbackFeedback('⚠ ERROR AL GUARDAR — revisa la consola', '#ff4444');
+  const intento1 = await window.SEMK_Pendientes.intentarEnviar(payload);
+  if (intento1.ok) {
+    nbackFeedback('✓ RESULTADOS GUARDADOS', '#00e676');
+    setTimeout(() => {
+      window.location.href = '/resultados.html?id=' + intento1.sesion_id;
+    }, 1500);
+    return;
   }
+
+  // Blip momentáneo: un segundo intento corto antes de rendirse.
+  nbackFeedback('⚠ Reintentando conexión...', '#ffcc00');
+  await new Promise(r => setTimeout(r, 2000));
+  const intento2 = await window.SEMK_Pendientes.intentarEnviar(payload);
+  if (intento2.ok) {
+    nbackFeedback('✓ RESULTADOS GUARDADOS', '#00e676');
+    setTimeout(() => {
+      window.location.href = '/resultados.html?id=' + intento2.sesion_id;
+    }, 1500);
+    return;
+  }
+
+  // sesion-service sigue sin responder: no dejamos al usuario
+  // trabado. Guardamos el payload para reenviarlo después y lo
+  // dejamos avanzar a resultados.html SIN "?id=" — esa página ya
+  // sabe leer los resultados desde sessionStorage en ese caso,
+  // así que el flujo se completa igual, sin depender de que
+  // sesion-service esté arriba en este momento.
+  window.SEMK_Pendientes.encolar(payload);
+  console.warn('[SEMK] sesion-service no respondió. Resultado guardado localmente para reintento automático.');
+  nbackFeedback('⚠ Sin conexión al servidor. Resultados guardados en este dispositivo.', '#ffcc00');
+  setTimeout(() => {
+    window.location.href = '/resultados.html';
+  }, 2000);
 }
  
 // ── Inicializar ───────────────────────────────
