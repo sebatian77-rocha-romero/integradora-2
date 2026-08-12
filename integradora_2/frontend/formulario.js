@@ -1,11 +1,8 @@
-// ─────────────────────────────────────────────
-//  formulario.js  v2
-//  Cambios principales:
-//  - Carga carreras desde GET /api/sesion/carreras
-//  - Carga géneros desde GET /api/sesion/generos
-//  - Ambos selects se llenan dinámicamente desde la BD
-//  - Guarda id_carrera e id_genero (no el texto) en sessionStorage
-// ─────────────────────────────────────────────
+
+//  Carga carreras desde GET /api/sesion/carreras
+// Carga géneros desde GET /api/sesion/generos
+// Ambos selects se llenan dinámicamente desde la BD
+// Guarda id_carrera e id_genero (no el texto) en sessionStorage
 
 document.addEventListener('DOMContentLoaded', async () => {
  
@@ -74,23 +71,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!select) return;
  
     try {
-      const res  = await fetch('/api/sesion/carreras');
-      const json = await res.json();
- 
-      if (!json.ok || !json.data?.length) {
-        console.warn('[SEMK] No se pudieron cargar las carreras desde la BD.');
+      const carreras = await window.SEMK_Catalogo.carreras();
+
+      if (!carreras?.length) {
+        console.warn('[SEMK] No se pudieron cargar las carreras.');
         return;
       }
- 
+
       select.innerHTML = '<option value="">-- SELECCIONE --</option>';
-      json.data.forEach(c => {
+      carreras.forEach(c => {
         const opt = document.createElement('option');
         opt.value       = c.id;
         opt.textContent = c.descr;
         select.appendChild(opt);
       });
- 
-      console.log('[SEMK] Carreras cargadas desde BD:', json.data.length);
+
+      console.log('[SEMK] Carreras cargadas:', carreras.length);
     } catch (err) {
       console.error('[SEMK] Error al cargar carreras:', err.message);
     }
@@ -102,23 +98,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!select) return;
  
     try {
-      const res  = await fetch('/api/sesion/generos');
-      const json = await res.json();
- 
-      if (!json.ok || !json.data?.length) {
-        console.warn('[SEMK] No se pudieron cargar los géneros desde la BD.');
+      const generos = await window.SEMK_Catalogo.generos();
+
+      if (!generos?.length) {
+        console.warn('[SEMK] No se pudieron cargar los géneros.');
         return;
       }
- 
+
       select.innerHTML = '<option value="">-- SELECCIONE --</option>';
-      json.data.forEach(g => {
+      generos.forEach(g => {
         const opt = document.createElement('option');
         opt.value       = g.id;
         opt.textContent = g.descr;
         select.appendChild(opt);
       });
  
-      console.log('[SEMK] Géneros cargados desde BD:', json.data.length);
+      console.log('[SEMK] Géneros cargados:', generos.length);
     } catch (err) {
       console.error('[SEMK] Error al cargar géneros:', err.message);
     }

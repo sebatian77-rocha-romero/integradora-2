@@ -8,13 +8,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btn           = document.getElementById('btn-registro');
   const errorBox       = document.getElementById('auth-error');
 
-  // ── Cargar géneros desde la bd
+  // ── Cargar géneros (con cache local, ver catalogo-cache.js)
   try {
-    const res  = await fetch('/api/sesion/generos');
-    const json = await res.json();
-    if (json.ok && json.data?.length) {
+    const generos = await window.SEMK_Catalogo.generos();
+    if (generos?.length) {
       selectGenero.innerHTML = '<option value="">-- SELECCIONE --</option>';
-      json.data.forEach(g => {
+      generos.forEach(g => {
         const opt = document.createElement('option');
         opt.value = g.id;
         opt.textContent = g.descr;
